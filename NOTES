@@ -1,0 +1,12 @@
+Must be in git repo (clients all operate per repo)
+  Host sends repo, branch and diff
+  Workers checkout repo and branch, apply diff, and build specified files
+
+If a worker fails to build, try on another worker?
+  Could be a misconfigured worker?
+
+Server can represent multiple repos
+  Host will send repo name on the build request
+
+Server
+  Multiple workers per thread; needs to scale to 100 workers
