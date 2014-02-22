@@ -10,3 +10,24 @@ Server can represent multiple repos
 
 Server
   Multiple workers per thread; needs to scale to 100 workers
+  TUI interface
+    Connected workers
+    Current builds
+    View of threads
+
+Flow
+  Server
+    Ping/pong with clients regularly
+    Keep track of client CPU usage
+
+    Upon a build request (with a number of files), distribute them among clients
+      Call back to host with any files that could not be distributed: no workers?
+
+    If a worker build fails, tray another worker? (misconfiguration)
+      Ultimately relay error info to host
+
+  Client
+    Have make determine what files need to be built
+    Make new connection with server as a host and send repo, branch, diff, and files
+    Build other files locally and listen for completions (or errors) from the server
+      If we're a worker, just have the server assign us work?
