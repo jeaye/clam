@@ -20,14 +20,16 @@ SERVER_BIN_OBJECTS=$(foreach obj,$(SERVER_OBJECTS), $(addprefix $(OBJ_DIR), $(ob
 CLIENT_BIN=bin/client
 SERVER_BIN=bin/server
 
-CXX=g++
+CXX=c++
 CXX_WARN=-Wall -Wextra -pedantic
 CXX_NOWARN=
 CXX_OPT=-ggdb
 CXX_INCLUDE=-I src
-CXX_FLAGS=-std=c++11 $(CXX_WARN) $(CXX_NOWARN) $(CXX_OPT) $(CXX_INCLUDE) -c
+CXX_PLATFORM_FLAGS=%CXX_PLATFORM_FLAGS_IN%
+CXX_FLAGS=-std=c++11 $(CXX_WARN) $(CXX_NOWARN) $(CXX_OPT) $(CXX_INCLUDE) $(CXX_PLATFORM_FLAGS) -c
 
-LD_LIBS=-lstdc++ -lrt -lpthread -lm -lc -lgcc
+LD_PLATFORM_LIBS=%LD_PLATFORM_LIBS_IN%
+LD_LIBS=-lpthread $(LD_PLATFORM_LIBS)
 
 COLOR_OFF=$(shell tput sgr0)
 COLOR_GREEN=$(shell tput setaf 2)
