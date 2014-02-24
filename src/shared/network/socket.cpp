@@ -66,7 +66,7 @@ namespace shared
       serv_addr.sin_port = htons(port);
 
       /* Tie the socket to the description. */
-      if(bind(m_socket, reinterpret_cast<sockaddr const *>(&serv_addr), sizeof(sockaddr_in)) != 0)
+      if(bind(m_socket, reinterpret_cast<sockaddr const*>(&serv_addr), sizeof(sockaddr_in)) != 0)
       { return false; }
 
       /* TODO: Var this. */
@@ -75,18 +75,24 @@ namespace shared
       return true;
     }
 
-    std::shared_ptr<socket> socket::accept()
+    socket::accept_result socket::accept()
     {
-      struct sockaddr_storage their_addr;
-      socklen_t addr_size(sizeof(their_addr));
+      struct sockaddr_storage from;
+      socklen_t addr_size(sizeof(from));
       int32_t const sock(
-          ::accept(m_socket, reinterpret_cast<struct sockaddr *>(&their_addr), &addr_size));
+          ::accept(m_socket, reinterpret_cast<struct sockaddr*>(&from), &addr_size));
       if(sock == -1)
-      { return nullptr; }
+      { throw std::runtime_error("Failed to accept TCP connection"); }
 
-      std::shared_ptr<socket> const ret(std::make_shared<socket>());
+      /* Extrapolate the string address from the address descriptor. */
+      sockaddr_in * const from_in{ reinterpret_cast<sockaddr_in*>(&from) };
+      char addr[INET_ADDRSTRLEN]{ 0 };
+      inet_ntop(AF_INET, &from_in->sin_addr.s_addr, addr, INET_ADDRSTRLEN);
+
+      /* Build a result summarizing the work. */
+      std::shared_ptr<socket> ret{ new socket };
       ret->m_socket = sock;
-      return ret;
+      return { { { addr }, ntohs(from_in->sin_port) }, std::move(ret) };
     }
 
     bool socket::connect(address const &addr)

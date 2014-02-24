@@ -18,6 +18,9 @@ namespace shared
       m_sock_addr.sin_port = htons(m_port);
     }
 
+    address address::localhost(port_t const port)
+    { return { "127.0.0.1", port }; }
+
     bool operator <(address const &lhs, address const &rhs)
     { return lhs.get_address() < rhs.get_address(); }
 

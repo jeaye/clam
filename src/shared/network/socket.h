@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <type_traits>
+#include <stdexcept>
 
 namespace shared
 {
@@ -13,7 +14,11 @@ namespace shared
     {
       public:
         socket() = default;
+        socket(socket const&) = delete;
+        socket(socket &&) = default;
         ~socket();
+        socket& operator =(socket const&) = delete;
+        socket& operator =(socket &&) = default;
 
         struct from_result
         {
@@ -21,6 +26,13 @@ namespace shared
           address const sender;
           /* The number of bytes read. */
           ssize_t const read;
+        };
+
+        struct accept_result
+        {
+          /* The address from which we read the data. */
+          address const sender;
+          std::shared_ptr<socket> sock;
         };
 
         /* Initializes the ability to use sockets. */
@@ -35,7 +47,7 @@ namespace shared
         /* Listens on the specified port for incoming TCP connections. */
         bool listen(port_t const port);
         /* Accepts an incoming TCP connection. */
-        std::shared_ptr<socket> accept();
+        accept_result accept();
 
         /* Disconnects the socket from any open connections. */
         void close() const
@@ -102,8 +114,7 @@ namespace shared
         struct hostent *m_host{};
         SOCKADDR_IN hints{};
 #else
-        /* The handle to the socket. */
-        int32_t m_socket{};
+        int32_t m_socket{}; /* TODO: unique_ptr with deleter. */
         addrinfo m_hints;
         addrinfo *m_info{};
 #endif

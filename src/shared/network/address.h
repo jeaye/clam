@@ -56,6 +56,8 @@ namespace shared
         address();
         address(std::string const &dest, port_t const port);
 
+        static address localhost(port_t const port);
+
         std::string const& get_address() const;
         void set_address(std::string const &addr);
 
