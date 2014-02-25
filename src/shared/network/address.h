@@ -43,6 +43,7 @@
 #endif
 
 #include <string>
+#include <iosfwd>
 
 namespace shared
 {
@@ -79,5 +80,6 @@ namespace shared
 
     bool operator <(address const &lhs, address const &rhs);
     bool operator ==(address const &lhs, address const &rhs);
+    std::ostream& operator <<(std::ostream &os, address const &rhs);
   }
 }

@@ -1,5 +1,7 @@
 #include "address.h"
 
+#include <ostream>
+
 namespace shared
 {
   namespace network
@@ -21,11 +23,16 @@ namespace shared
     address address::localhost(port_t const port)
     { return { "127.0.0.1", port }; }
 
+    /* TODO: Consider port? */
     bool operator <(address const &lhs, address const &rhs)
     { return lhs.get_address() < rhs.get_address(); }
 
+    /* TODO: Consider port? */
     bool operator ==(address const &lhs, address const &rhs)
     { return lhs.get_address() == rhs.get_address(); }
+
+    std::ostream& operator <<(std::ostream &os, address const &rhs)
+    { return (os << rhs.get_address() << ":" << rhs.get_port()); }
 
     std::string const& address::get_address() const
     { return m_addr; }

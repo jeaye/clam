@@ -11,3 +11,10 @@
 *.lai
 *.la
 *.a
+
+# Temporary Makefiles
+Makefile
+Makefile.tmp
+
+# Output directories
+bin/
