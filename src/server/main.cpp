@@ -1,12 +1,13 @@
 #include <iostream>
 
-#include "controller.h"
+#include "core.h"
 
+/* TODO: termbox (ncurses? something C++?) UI */
 int main(int const, char ** const)
 {
   try
   {
-    server::controller c;
+    server::core c;
     c.run();
   }
   catch(std::exception const &e)

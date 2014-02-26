@@ -31,3 +31,13 @@ Flow
     Make new connection with server as a host and send repo, branch, diff, and files
     Build other files locally and listen for completions (or errors) from the server
       If we're a worker, just have the server assign us work?
+
+Tasks (in somewhat-chronological order)
+  [X] Get server listening to TCP connections
+  [ ] Compose some serialization/deserialization tactic
+      for sending data
+  [ ] Ping test those connections regularly (pinger operator)
+    [ ] Handle dead workers using RAII
+  [ ] Start collecting CPU information from workers
+    [ ] Flush out reader operator to send notifications
+  [ ] Build TUI for server

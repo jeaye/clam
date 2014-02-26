@@ -33,7 +33,6 @@ namespace server
   struct worker_added
   {
     net::address const a;
-    /* Only the controller should own the workers. */
     std::weak_ptr<worker> const w;
   };
 }

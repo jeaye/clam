@@ -4,9 +4,8 @@
 #include "generic_pool.h"
 #include "worker.h"
 
-/* TODO: op directory for these? */
-#include "reader.h"
-#include "pinger.h"
+#include "op/reader.h"
+#include "op/pinger.h"
 
 #include <map>
 #include <thread>
@@ -17,27 +16,27 @@ namespace net = shared::network;
 
 namespace server
 {
-  class controller
+  class core
   {
     public:
-      controller()
-        : m_pinger(std::chrono::milliseconds(1000))
+      core()
       {
         if(!m_listener.listen(m_port))
         { throw std::runtime_error("Failed to open port for listening"); }
 
         generic_pool_t::global().subscribe<net::socket::accept_result>(
-            std::bind(&controller::added_worker, this, std::placeholders::_1));
+            std::bind(&core::added_worker, this, std::placeholders::_1));
       }
 
       void run()
       {
-        std::thread const t(std::bind(&controller::accept, this));
+        std::thread const t(std::bind(&core::accept, this));
         while(true)
         {
           while(generic_pool_t::global().poll()) ;
 
-          m_pinger.update(m_workers);
+          m_reader(m_workers);
+          m_pinger(m_workers);
 
           std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
@@ -45,6 +44,7 @@ namespace server
 
       void accept()
       {
+        /* Dedicated thread for accepting connections. */
         while(true)
         {
           auto res(m_listener.accept());
@@ -64,10 +64,15 @@ namespace server
         generic_pool_t::global().post(worker_added{ res.sender, shared, });
       }
 
+      /* Our connection. */
       static net::port_t constexpr m_port{ 2272 };
       net::socket m_listener;
+
+      /* Only the core should own the workers -- everyone else use weak_ptr. */
       std::map<net::address, std::shared_ptr<worker>> m_workers;
-      reader m_reader;
-      pinger m_pinger;
+
+      /* Operators. */
+      op::reader m_reader;
+      op::pinger m_pinger{ std::chrono::milliseconds(1000) };
   };
 }
