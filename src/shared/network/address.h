@@ -1,3 +1,12 @@
+/*
+  Copyright © 2014 Jesse 'Jeaye' Wilkerson
+  See licensing in LICENSE file, or at:
+    http://www.opensource.org/licenses/MIT
+
+  File: address.h
+  Author: Jesse 'Jeaye' Wilkerson
+*/
+
 #pragma once
 
 #include <cstdint>

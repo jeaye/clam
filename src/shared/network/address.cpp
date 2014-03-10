@@ -1,3 +1,12 @@
+/*
+  Copyright © 2014 Jesse 'Jeaye' Wilkerson
+  See licensing in LICENSE file, or at:
+    http://www.opensource.org/licenses/MIT
+
+  File: address.cpp
+  Author: Jesse 'Jeaye' Wilkerson
+*/
+
 #include "address.h"
 
 #include <ostream>

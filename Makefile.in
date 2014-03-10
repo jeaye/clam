@@ -1,6 +1,15 @@
+# Copyright © 2014 Jesse 'Jeaye' Wilkerson
+# See licensing in LICENSE file, or at:
+#   http://www.opensource.org/licenses/MIT
+#
+# File: Makefile.in
+# Author: Jesse 'Jeaye' Wilkerson
+
 SHARED_SOURCES= \
 							 src/shared/network/socket.cpp \
-							 src/shared/network/address.cpp
+							 src/shared/network/address.cpp \
+							 src/shared/term/context.cpp \
+							 src/shared/term/window.cpp
 SERVER_SOURCES= \
 							 src/server/main.cpp
 CLIENT_SOURCES= \
@@ -24,12 +33,12 @@ CXX=c++
 CXX_WARN=-Wall -Wextra -pedantic
 CXX_NOWARN=
 CXX_OPT=-ggdb
-CXX_INCLUDE=-I src
+CXX_INCLUDE=-I src -I lib/termbox/src
 CXX_PLATFORM_FLAGS=%CXX_PLATFORM_FLAGS_IN%
-CXX_FLAGS=-std=c++11 $(CXX_WARN) $(CXX_NOWARN) $(CXX_OPT) $(CXX_INCLUDE) $(CXX_PLATFORM_FLAGS) -c
+CXX_FLAGS=-std=c++1y $(CXX_WARN) $(CXX_NOWARN) $(CXX_OPT) $(CXX_INCLUDE) $(CXX_PLATFORM_FLAGS) -c
 
 LD_PLATFORM_LIBS=%LD_PLATFORM_LIBS_IN%
-LD_LIBS=-lpthread $(LD_PLATFORM_LIBS)
+LD_LIBS=-lpthread -L lib/termbox/build/src -ltermbox $(LD_PLATFORM_LIBS)
 
 COLOR_OFF=$(shell tput sgr0)
 COLOR_GREEN=$(shell tput setaf 2)
