@@ -11,6 +11,7 @@
 
 #include "../generic_pool.h"
 #include "shared/network/socket.h"
+#include "shared/protocol/message.h"
 
 #include <map>
 #include <memory>
