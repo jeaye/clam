@@ -30,8 +30,7 @@ namespace server
     public:
       core()
       {
-        if(!m_listener.listen(m_port))
-        { throw std::runtime_error("Failed to open port for listening"); }
+        m_listener.listen(m_port);
 
         generic_pool_t::global().subscribe<net::socket::accept_result>(
             std::bind(&core::added_worker, this, std::placeholders::_1));

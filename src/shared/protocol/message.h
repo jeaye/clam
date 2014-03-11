@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "shared/notif/pool.h"
+
 namespace shared
 {
   namespace protocol
@@ -18,6 +20,7 @@ namespace shared
     {
       ping, pong
     };
+    using pool_t = notif::pool<message>;
 
     struct header
     {

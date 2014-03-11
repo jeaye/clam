@@ -24,7 +24,7 @@ namespace shared
       border_text(unicode_t const ch)
       {
         data.push_back(ch);
-        sty = { wrapping::none, alignment::left, coloring::none };
+        sty = style{ wrapping::none, alignment::left, coloring::none };
       }
     };
     struct border_cells
@@ -200,7 +200,7 @@ namespace shared
         pos_t m_width{}, m_height{};
         attrib_state m_attrib_state{};
         border_cells m_borders;
-        context &m_context{ context::global() };
+        context &m_context = context::global(); /* XXX: GCC 4.9 solves the {} bug */
     };
   }
 }

@@ -41,7 +41,7 @@ namespace shared
 
     void context::poll()
     {
-      tb_event ev{};
+      tb_event ev;
       while(true)
       {
         auto const ret(tb_peek_event(&ev, 0));
@@ -59,7 +59,7 @@ namespace shared
 
     void context::wait_poll()
     {
-      tb_event ev{};
+      tb_event ev;
       auto const ret(tb_poll_event(&ev));
 
       if(ret < 0) /* Error */

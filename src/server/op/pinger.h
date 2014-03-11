@@ -51,7 +51,7 @@ namespace server
         pinger& operator =(pinger const&) = delete;
         pinger& operator =(pinger &&) = default;
 
-        void operator ()(std::map<net::address, std::shared_ptr<worker>> &workers)
+        void operator ()(std::map<net::address, std::shared_ptr<worker>> &)
         {
           auto const now(std::chrono::system_clock::now());
           for(auto it(m_workers.cbegin()); it != m_workers.cend(); )
@@ -64,8 +64,8 @@ namespace server
               auto const diff(now - it->second.last);
               if(diff > m_timeout)
               {
-                std::cout << "slow ping; removing worker at " << shared->get_address() << std::endl;
-                workers.erase(shared->get_address());
+                //std::cout << "slow ping; removing worker at " << shared->get_address() << std::endl;
+                //workers.erase(shared->get_address());
               }
               ++it;
             }

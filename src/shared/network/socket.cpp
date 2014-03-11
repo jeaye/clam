@@ -43,13 +43,13 @@ namespace shared
 #endif
     }
 
-    bool socket::open(port_t const port)
+    void socket::open(port_t const port)
     {
       /* Create a UDP socket. */
       m_socket = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
       if(m_socket <= 0)
-      { return false; }
+      { throw std::runtime_error("Failed to open socket"); }
 
       sockaddr_in address;
       address.sin_family = AF_INET;
@@ -58,16 +58,18 @@ namespace shared
 
       /* Tie the socket to the description. */
       if(bind(m_socket, reinterpret_cast<sockaddr const*>(&address), sizeof(sockaddr_in)) != 0)
-      { return false; }
-
-      return true;
+      { throw std::runtime_error("Failed to bind socket"); }
     }
 
-    bool socket::listen(port_t const port)
+    void socket::listen(port_t const port)
     {
       m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
       if(m_socket == -1)
-      { return false; }
+      { throw std::runtime_error("Failed to open socket"); }
+
+      int const optval{ 1 };
+      if(setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0)
+      { throw std::runtime_error("Failed to configure socket"); }
 
       struct sockaddr_in serv_addr;
       serv_addr.sin_family = AF_INET;
@@ -76,12 +78,10 @@ namespace shared
 
       /* Tie the socket to the description. */
       if(bind(m_socket, reinterpret_cast<sockaddr const*>(&serv_addr), sizeof(sockaddr_in)) != 0)
-      { return false; }
+      { throw std::runtime_error("Failed to bind socket"); }
 
       /* TODO: Var this. */
       ::listen(m_socket, 10); /* Allow a queue of 10. */
-
-      return true;
     }
 
     socket::accept_result socket::accept()
@@ -104,7 +104,7 @@ namespace shared
       return { { { addr }, ntohs(from_in->sin_port) }, std::move(ret) };
     }
 
-    bool socket::connect(address const &addr)
+    void socket::connect(address const &addr)
     {
       /* Get info on the destination. */
       std::memset(&m_hints, 0, sizeof(m_hints));
@@ -115,20 +115,15 @@ namespace shared
                                      addr.get_port_str().c_str(),
                                      &m_hints, &m_info) };
       if(ret)
-      {
-        std::cout << "Failed to connect: " << gai_strerror(ret) << std::endl;
-        return false;
-      }
+      { throw std::runtime_error("Failed to get address info"); }
 
       m_socket = ::socket(m_info->ai_family, m_info->ai_socktype, m_info->ai_protocol);
       if(m_socket == -1)
-      { return false; }
+      { throw std::runtime_error("Failed to create socket"); }
 
       /* Attempt to connect to the destination. */
       if(::connect(m_socket, m_info->ai_addr, m_info->ai_addrlen) == -1)
-      { return false; }
-
-      return true;
+      { throw std::runtime_error("Failed to connect socket"); }
     }
 
     void socket::disconnect() const

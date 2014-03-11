@@ -47,9 +47,14 @@ namespace shared
 
     struct style
     {
-      wrapping wrap;
-      alignment align;
-      coloring color;
+      style() = default;
+      style(wrapping const w, alignment const a, coloring const c)
+        : wrap(w), align(a), color(c)
+      { }
+
+      wrapping wrap{};
+      alignment align{};
+      coloring color{};
     };
 
     template <typename String>

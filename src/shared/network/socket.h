@@ -50,11 +50,11 @@ namespace shared
         static void shutdown();
 
         /* Attempts to open the socket on the specified port for UDP work. */
-        bool open(port_t const port);
-        /* Attempts to connect to the specified address. */
-        bool connect(address const &addr);
+        void open(port_t const port);
+        /* Attempts to TCP connect to the specified address. */
+        void connect(address const &addr);
         /* Listens on the specified port for incoming TCP connections. */
-        bool listen(port_t const port);
+        void listen(port_t const port);
         /* Accepts an incoming TCP connection. */
         accept_result accept();
 
@@ -115,7 +115,7 @@ namespace shared
 
       private:
         template <typename T>
-        void assert_pod()
+        static void assert_pod()
         { static_assert(std::is_pod<T>::value, "Type must be POD; otherwise use void* overload"); }
 
 #if PLATFORM == PLATFORM_WINDOWS
