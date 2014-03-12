@@ -13,8 +13,10 @@
 #include <thread>
 
 #include "shared/network/socket.h"
+#include "shared/protocol/message.h"
 
 namespace net = shared::network;
+namespace proto = shared::protocol;
 
 int main(int const, char ** const)
 {
@@ -24,7 +26,7 @@ int main(int const, char ** const)
     sock.connect({ "127.0.0.1", 2272 });
     while(true)
     {
-      std::array<char, 512> arr;
+      proto::array_buffer arr;
       auto const read(sock.receive(arr.data(), arr.size()));
       if(read)
       {

@@ -10,6 +10,9 @@
 #pragma once
 
 #include "shared/notif/pool.h"
+#include "ping_pong.h"
+
+#include <array>
 
 namespace shared
 {
@@ -20,20 +23,33 @@ namespace shared
     {
       ping, pong
     };
+    static size_t constexpr max_message_size{ 512 };
+    using array_buffer = std::array<char, max_message_size>;
     using pool_t = notif::pool<message>;
 
-    struct header
-    {
-      message msg;
-      size_t size;
-    };
+    /* Conversion to enum from type. */
+    template <typename T>
+    struct message_enum;
 
-    /* TODO ping_pong.h */
-    struct ping
-    {
-    };
-    struct pong
-    {
-    };
+    template <>
+    struct message_enum<ping>
+    { static message constexpr value{ message::ping }; };
+
+    template <>
+    struct message_enum<pong>
+    { static message constexpr value{ message::pong }; };
+
+    /* Conversion to type from enum. */
+    template <message M>
+    struct message_type;
+
+    template <>
+    struct message_type<message::ping>
+    { using type = ping; };
+
+    template <>
+    struct message_type<message::pong>
+    { using type = pong; };
   }
 }
+#include "header.h" /* TODO: ehh, really? */

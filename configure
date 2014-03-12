@@ -67,11 +67,11 @@ then
 elif [ "1" -eq "$UNAME_OSX" ];
 then
   log "Platform: OSX"
-  CXX_PLATFORM_FLAGS=-stdlib=libc++
-  LD_PLATFORM_LIBS=-lc++
+  CXX_PLATFORM_FLAGS="-stdlib=libc++ -I /opt/local/include"
+  LD_PLATFORM_LIBS="-lc++"
 elif [ "1" -eq "$UNAME_CYGWIN" ];
 then
-  log "Platform: Cygwin"
+  log "Platform: Cygwin (NOT TESTED)"
 fi
 
 # Update submodules

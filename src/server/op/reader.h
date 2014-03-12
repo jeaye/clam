@@ -16,9 +16,9 @@
 
 #include <map>
 #include <memory>
-#include <array>
 
 namespace net = shared::network;
+namespace proto = shared::protocol;
 
 namespace server
 {
@@ -40,7 +40,7 @@ namespace server
           for(auto const &worker : workers)
           {
             auto const socket(worker.second->get_socket());
-            std::array<char, 512> arr;
+            proto::array_buffer arr;
             auto const read(socket->receive(arr.data(), arr.size()));
             if(read)
             {

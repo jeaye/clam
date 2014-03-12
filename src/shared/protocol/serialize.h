@@ -24,7 +24,7 @@ namespace shared
     {
       std::ostringstream oss;
       boost::archive::text_oarchive oa{ oss };
-      oa << std::forward<T>(o);
+      oa << o;
       return oss.str();
     }
 

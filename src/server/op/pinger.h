@@ -11,6 +11,8 @@
 
 #include "../worker.h"
 #include "../generic_pool.h"
+#include "shared/protocol/serialize.h"
+#include "shared/protocol/sender.h"
 
 #include <iostream>
 #include <memory>
@@ -21,6 +23,7 @@
 #include <stdexcept>
 
 namespace net = shared::network;
+namespace proto = shared::protocol;
 
 namespace server
 {
@@ -79,8 +82,7 @@ namespace server
           { throw std::runtime_error("Worker already exists in pinger map"); }
 
           auto const shared(wa.w.lock());
-          std::string const ping{ "ping\r\n" };
-          shared->get_socket()->send(ping.c_str(), ping.size());
+          proto::sender::send(shared::protocol::ping{}, shared->get_socket());
           m_workers[wa.a] = { wa.w, std::chrono::system_clock::now() };
         }
 
