@@ -11,9 +11,12 @@
 #include <string>
 #include <array>
 #include <thread>
+#include <memory>
 
 #include "shared/network/socket.h"
 #include "shared/protocol/message.h"
+#include "shared/protocol/sender.h"
+#include "shared/protocol/receiver.h"
 
 namespace net = shared::network;
 namespace proto = shared::protocol;
@@ -22,19 +25,20 @@ int main(int const, char ** const)
 {
   try
   {
-    net::socket sock;
-    sock.connect({ "127.0.0.1", 2272 });
+    auto const sock(std::make_shared<net::socket>());
+    sock->connect({ "127.0.0.1", 2272 });
+
+    proto::pool_t::global().subscribe<proto::event<proto::ping>>([&]
+    {
+      std::cout << "pinged in notif" << std::endl;
+      proto::sender::send(proto::pong{}, sock);
+    });
+
     while(true)
     {
-      proto::array_buffer arr;
-      auto const read(sock.receive(arr.data(), arr.size()));
-      if(read)
-      {
-        std::cout << arr.data() << std::flush;
-        if(std::string{arr.data()}.find("ping") != std::string::npos)
-        { sock.send("pong", 5); }
-      }
+      proto::receiver::receive(sock);
 
+      while(proto::pool_t::global().poll());
       std::this_thread::yield();
     }
   }

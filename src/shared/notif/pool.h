@@ -56,6 +56,9 @@ namespace shared
         template <typename A>
         typename callback<A>::tag_t subscribe(std::function<void (A)> const &cb)
         { return subscribe<A, state>([=](A a){ cb(a); return state::subscribed; }); }
+        template <typename A>
+        typename callback<A>::tag_t subscribe(std::function<void ()> const &cb)
+        { return subscribe<A, state>([=](A const&){ cb(); return state::subscribed; }); }
 
         /* Returns whether or not an event was handled. */
         bool poll()

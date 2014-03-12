@@ -48,6 +48,8 @@ namespace server
         {
           generic_pool_t::global().subscribe<worker_added>(
               std::bind(&pinger::added_worker, this, std::placeholders::_1));
+          proto::pool_t::global().subscribe<proto::event<proto::pong>>(
+              std::bind(&pinger::ponged, this, std::placeholders::_1));
         }
         pinger(pinger const&) = delete;
         pinger(pinger &&) = default;
@@ -84,6 +86,24 @@ namespace server
           auto const shared(wa.w.lock());
           proto::sender::send(shared::protocol::ping{}, shared->get_socket());
           m_workers[wa.a] = { wa.w, std::chrono::system_clock::now() };
+        }
+
+        void ponged(proto::event<proto::pong> const &ev)
+        {
+          std::cout << "pinger ponged" << std::endl;
+          auto const it(m_workers.find(ev.sender));
+          if(it != m_workers.end())
+          {
+            auto const shared(it->second.w.lock());
+            if(shared)
+            {
+              it->second.last = std::chrono::system_clock::now();
+              /* TODO: SIGPIPE when the worker dies :( */
+              proto::sender::send(shared::protocol::ping{}, shared->get_socket());
+            }
+          }
+          else
+          { throw std::runtime_error("Pong from ghost worker"); }
         }
 
         std::map<net::address, entry> m_workers;

@@ -24,8 +24,8 @@ namespace shared
       {
         std::string const body{ serialize<T>(std::forward<T>(data)) };
         std::string const hdr{ serialize<header>({ message_enum<T>::value, body.size() }) };
-        sock->send(hdr.data(), hdr.size());
-        sock->send(body.data(), body.size());
+        sock->send(hdr.data(), hdr.size() + 1);
+        sock->send(body.data(), body.size() + 1);
       }
     }
   }

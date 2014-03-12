@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "shared/network/socket.h"
 #include "shared/notif/pool.h"
 #include "ping_pong.h"
 
@@ -26,6 +27,13 @@ namespace shared
     static size_t constexpr max_message_size{ 512 };
     using array_buffer = std::array<char, max_message_size>;
     using pool_t = notif::pool<message>;
+
+    template <typename M>
+    struct event
+    {
+      network::address sender;
+      M data;
+    };
 
     /* Conversion to enum from type. */
     template <typename T>

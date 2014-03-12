@@ -57,6 +57,9 @@ namespace shared
         void listen(port_t const port);
         /* Accepts an incoming TCP connection. */
         accept_result accept();
+        
+        /* Calculates the address for a TCP connection. */
+        address get_address() const;
 
         /* Disconnects the socket from any open connections. */
         void close() const

@@ -87,9 +87,9 @@ namespace shared
     socket::accept_result socket::accept()
     {
       struct sockaddr_storage from;
-      socklen_t addr_size(sizeof(from));
+      socklen_t addr_size{ sizeof(from) };
       int32_t const sock(
-          ::accept(m_socket, reinterpret_cast<struct sockaddr*>(&from), &addr_size));
+          ::accept(m_socket, reinterpret_cast<sockaddr*>(&from), &addr_size));
       if(sock == -1)
       { throw std::runtime_error("Failed to accept TCP connection"); }
 
@@ -156,7 +156,7 @@ namespace shared
 #endif
 
       /* Specified the address that's being received from. */
-      sockaddr_in from;
+      struct sockaddr_storage from;
       socklen_t from_length{ sizeof(from) };
 
       /* Peek and check if there are any bytes waiting. */
@@ -167,11 +167,37 @@ namespace shared
       { return { {}, 0 }; }
 
       /* Extrapolate the string address from the address descriptor. */
+      sockaddr_in * const from_in{ reinterpret_cast<sockaddr_in*>(&from) };
       char addr[INET_ADDRSTRLEN]{ 0 };
-      inet_ntop(AF_INET, &from.sin_addr.s_addr, addr, INET_ADDRSTRLEN);
+      inet_ntop(AF_INET, &from_in->sin_addr.s_addr, addr, INET_ADDRSTRLEN);
 
       /* Build a result summarizing the work. */
-      return { { { addr }, ntohs(from.sin_port) }, received_bytes };
+      return { { { addr }, ntohs(from_in->sin_port) }, received_bytes };
+    }
+
+    address socket::get_address() const
+    {
+      struct sockaddr_storage addr;
+      socklen_t len{ sizeof(addr) };
+      char ipstr[INET6_ADDRSTRLEN]{ 0 };
+      port_t port{};
+      getpeername(m_socket, reinterpret_cast<sockaddr*>(&addr), &len);
+
+      /* Deal with both IPv4 and IPv6 */
+      if(addr.ss_family == AF_INET)
+      {
+        sockaddr_in * const s{ reinterpret_cast<sockaddr_in*>(&addr) };
+        port = ntohs(s->sin_port);
+        inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof(ipstr));
+      }
+      else 
+      { 
+        sockaddr_in6 * const s{ reinterpret_cast<sockaddr_in6 *>(&addr) };
+        port = ntohs(s->sin6_port);
+        inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof(ipstr));
+      }
+
+      return { { ipstr }, port };
     }
 
     bool socket::set_non_blocking() const

@@ -13,6 +13,7 @@
 #include "shared/network/socket.h"
 #include "shared/protocol/message.h"
 #include "shared/protocol/serialize.h"
+#include "shared/protocol/receiver.h"
 
 #include <map>
 #include <memory>
@@ -24,7 +25,6 @@ namespace server
 {
   namespace op
   {
-    /* TODO: [de]serialization, notifications */
     class reader
     {
       public:
@@ -36,17 +36,12 @@ namespace server
 
         void operator ()(std::map<net::address, std::shared_ptr<worker>> &workers)
         {
-          /* TODO: Iterate workers and read/deserialize data. */
           for(auto const &worker : workers)
           {
             auto const socket(worker.second->get_socket());
-            proto::array_buffer arr;
-            auto const read(socket->receive(arr.data(), arr.size()));
-            if(read)
-            {
-              std::cout << worker.first << " says: " << arr.data() << std::endl;
-            }
+            proto::receiver::receive(socket);
           }
+          while(proto::pool_t::global().poll());
         }
 
       private:
