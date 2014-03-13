@@ -1,7 +1,7 @@
-clam - A distributed build system
+clam
 ====
 
 #### Dependencies
-C++11
-termbox (included)
-  Used for the server's TUI
+* C++11
+* termbox (included)
+  * Used for the server's TUI
