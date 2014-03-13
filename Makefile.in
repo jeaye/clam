@@ -9,7 +9,8 @@ SHARED_SOURCES= \
 							 src/shared/network/socket.cpp \
 							 src/shared/network/address.cpp \
 							 src/shared/term/context.cpp \
-							 src/shared/term/window.cpp
+							 src/shared/term/window.cpp \
+							 src/shared/protocol/message.cpp
 SERVER_SOURCES= \
 							 src/server/main.cpp
 CLIENT_SOURCES= \

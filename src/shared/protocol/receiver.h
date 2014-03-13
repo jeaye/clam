@@ -61,21 +61,13 @@ namespace shared
             //std::cout << "body size: " << body_text.size() << std::endl;
             //std::cout << "body: " << body_text << std::endl;
 
-            switch(hdr.msg)
-            {
-              case message::ping:
-              {
-                pool_t::global().post<event<ping>>({ sender, deserialize<ping>(body_text) });
-              } break;
-
-              case message::pong:
-              {
-                pool_t::global().post<event<pong>>({ sender, deserialize<pong>(body_text) });
-              } break;
-
-              default:
-                throw std::runtime_error("Unexpected message type");
-            }
+            auto const msg(static_cast<int>(hdr.msg));
+            if(msg < 0)
+            { throw std::out_of_range("Negative message type"); }
+            else if(msg >= static_cast<int>(notifiers.size()))
+            { throw std::out_of_range("Out of bounds message type"); }
+            
+            notifiers[msg](sender, body_text);
           }
         }
       }

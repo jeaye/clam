@@ -15,6 +15,7 @@ namespace shared
 {
   namespace protocol
   {
+    /* TODO: Send time? Calculate ping. */
     struct ping
     {
       private:

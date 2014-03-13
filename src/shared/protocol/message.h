@@ -15,18 +15,27 @@
 
 #include <array>
 
+namespace net = shared::network;
+
 namespace shared
 {
   namespace protocol
   {
+    /* Call once at program startup. */
+    void initialize();
+
     /* All different types of messages. */
     enum class message
     {
-      ping, pong
+      ping, pong,
+      max
     };
     static size_t constexpr max_message_size{ 512 };
     using array_buffer = std::array<char, max_message_size>;
     using pool_t = notif::pool<message>;
+
+    extern std::array<std::function<void (net::address const&, std::string const&)>,
+                      static_cast<size_t>(message::max)> notifiers;
 
     template <typename M>
     struct event

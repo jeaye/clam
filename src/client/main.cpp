@@ -25,6 +25,8 @@ int main(int const, char ** const)
 {
   try
   {
+    proto::initialize();
+
     auto const sock(std::make_shared<net::socket>());
     sock->connect({ "127.0.0.1", 2272 });
 

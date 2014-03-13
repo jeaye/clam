@@ -30,6 +30,7 @@ namespace server
     public:
       core()
       {
+        proto::initialize();
         m_listener.listen(m_port);
 
         generic_pool_t::global().subscribe<net::socket::accept_result>(
