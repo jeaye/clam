@@ -32,7 +32,7 @@ int main(int const, char ** const)
 
     proto::pool_t::global().subscribe<proto::event<proto::ping>>([&]
     {
-      std::cout << "pinged in notif" << std::endl;
+      std::cout << "pinged" << std::endl;
       proto::sender::send(proto::pong{}, sock);
     });
 

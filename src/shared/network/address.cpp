@@ -32,13 +32,17 @@ namespace shared
     address address::localhost(port_t const port)
     { return { "127.0.0.1", port }; }
 
-    /* TODO: Consider port? */
     bool operator <(address const &lhs, address const &rhs)
-    { return lhs.get_address() < rhs.get_address(); }
+    {
+      return (lhs.get_address() < rhs.get_address()) ||
+             (lhs.get_port() < rhs.get_port());
+    }
 
-    /* TODO: Consider port? */
     bool operator ==(address const &lhs, address const &rhs)
-    { return lhs.get_address() == rhs.get_address(); }
+    {
+      return (lhs.get_address() == rhs.get_address()) &&
+             (lhs.get_port() == rhs.get_port());
+    }
 
     std::ostream& operator <<(std::ostream &os, address const &rhs)
     { return (os << rhs.get_address() << ":" << rhs.get_port()); }

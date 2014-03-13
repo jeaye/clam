@@ -7,6 +7,8 @@
   Author: Jesse 'Jeaye' Wilkerson
 */
 
+#include <signal.h>
+
 #include "message.h"
 
 namespace shared
@@ -27,6 +29,9 @@ namespace shared
 
     void initialize()
     {
+      /* TODO: More error/state checking in socket? */
+      signal(SIGPIPE, SIG_IGN);
+
       subscribe<message::ping>();
       subscribe<message::pong>();
     }
