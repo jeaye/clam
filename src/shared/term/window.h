@@ -50,13 +50,15 @@ namespace shared
         void set_fg(attrib_t const fg);
         void set_bg(attrib_t const bg);
 
-        void draw();
+        void set_title(std::string const &t);
 
-        void draw(pos_t const ox, pos_t const oy, char const * const str,
+        void render();
+
+        void render(pos_t const ox, pos_t const oy, char const * const str,
                   style const s = style{});
 
         template <typename String>
-        void draw(pos_t const ox, pos_t const oy, String const &str,
+        void render(pos_t const ox, pos_t const oy, String const &str,
                   style const s = style{})
         {
           pos_t x{ ox }, y{ oy };
@@ -93,7 +95,7 @@ namespace shared
                 else if(ch == U'\r')
                 { x = 0; set_cursor(m_inside_x + x, m_inside_y + y); }
                 else
-                { draw_cell(m_inside_x + x++, m_inside_y + y, ch, fg, bg); }
+                { render_cell(m_inside_x + x++, m_inside_y + y, ch, fg, bg); }
                 if(x >= (m_x + m_width - 2) || y >= (m_y + m_height - 2))
                 { break; }
               }
@@ -107,7 +109,7 @@ namespace shared
                 else if(ch == U'\r')
                 { x = 0; set_cursor(m_inside_x + x, m_inside_y + y); }
                 else
-                { draw_cell(m_inside_x + x++, m_inside_y + y, ch, fg, bg); }
+                { render_cell(m_inside_x + x++, m_inside_y + y, ch, fg, bg); }
                 if(x > m_width - 2)
                 { x = 0; ++y; }
                 if(y >= (m_y + m_height - 2))
@@ -123,7 +125,7 @@ namespace shared
                 else if(str[i] == U'\r')
                 { x = 0; set_cursor(m_inside_x + x, m_inside_y + y); }
                 else
-                { draw_cell(m_inside_x + x++, m_inside_y + y, str[i], fg, bg); }
+                { render_cell(m_inside_x + x++, m_inside_y + y, str[i], fg, bg); }
                 if(x > m_width - 2)
                 {
                   /* If it's whitespace, we're cool. */
@@ -134,14 +136,14 @@ namespace shared
                     while(str[i] != ' ')
                     {
                       --i; --x;
-                      draw(x, y, " ");
+                      render(x, y, " ");
 
                       /* The word is too long... switch to char wrapping. */
                       if(x == 0 || i == 0) 
                       {
                         auto sty(s);
                         sty.wrap = wrapping::character;
-                        draw(ox, oy, str, sty); /* recurse */
+                        render(ox, oy, str, sty); /* recurse */
                         return;
                       }
                     }
@@ -156,28 +158,28 @@ namespace shared
         }
         
         /* Single unicode char, no coloring. */
-        void draw(pos_t const x, pos_t const y, unicode_t const c);
+        void render(pos_t const x, pos_t const y, unicode_t const c);
 
         /* Pre-built cells, possible coloring. */
-        void draw(pos_t const x, pos_t const y, cell const &c);
-        void draw(pos_t x, pos_t y, cell_string const &str);
+        void render(pos_t const x, pos_t const y, cell const &c);
+        void render(pos_t x, pos_t y, cell_string const &str);
 
         template <typename Text>
-        void draw(Text const &t)
+        void render(Text const &t)
         {
           switch(t.sty.align)
           {
             case alignment::left:
             {
-              draw(t.x, t.y, t.data, t.sty);
+              render(t.x, t.y, t.data, t.sty);
             } break;
             case alignment::right:
             {
-              draw(m_width - 1 - t.data.size(), t.y, t.data, t.sty);
+              render(m_width - 1 - t.data.size(), t.y, t.data, t.sty);
             } break;
             case alignment::center:
             {
-              draw((m_width >> 1) - (t.data.size() >> 1), t.y, t.data, t.sty);
+              render((m_width >> 1) - (t.data.size() >> 1), t.y, t.data, t.sty);
             } break;
             default:
               throw std::runtime_error("Invalid text alignment: " +
@@ -186,11 +188,11 @@ namespace shared
         }
 
       private:
-        void draw_cell(pos_t const x, pos_t const y, char const ch,
+        void render_cell(pos_t const x, pos_t const y, char const ch,
                        attrib_t const fg, attrib_t const bg);
-        void draw_cell(pos_t const x, pos_t const y, cell const c,
+        void render_cell(pos_t const x, pos_t const y, cell const c,
                        attrib_t const fg, attrib_t const bg);
-        void draw_cell(pos_t const x, pos_t const y, unicode_t const ch,
+        void render_cell(pos_t const x, pos_t const y, unicode_t const ch,
                        attrib_t const fg, attrib_t const bg);
         void set_cursor(pos_t const x, pos_t const y);
         void increment_cursor();
@@ -201,6 +203,7 @@ namespace shared
         attrib_state m_attrib_state{};
         border_cells m_borders;
         context &m_context = context::global(); /* XXX: GCC 4.9 solves the {} bug */
+        std::string m_title;
     };
   }
 }

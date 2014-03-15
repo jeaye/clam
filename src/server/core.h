@@ -16,10 +16,17 @@
 #include "op/reader.h"
 #include "op/pinger.h"
 
+#include "shared/term/context.h"
+#include "shared/term/window.h"
+
+#include "ui/home.h"
+
 #include <map>
 #include <thread>
 #include <chrono>
 #include <functional>
+#include <mutex>
+#include <condition_variable>
 
 namespace net = shared::network;
 
@@ -28,67 +35,15 @@ namespace server
   class core
   {
     public:
-      core()
-      {
-        proto::initialize();
-        m_listener.listen(m_port);
+      core();
 
-        generic_pool_t::global().subscribe<net::socket::accept_result>(
-            std::bind(&core::added_worker, this, std::placeholders::_1));
-      }
-
-      void run()
-      {
-        std::thread t(std::bind(&core::accept, this));
-        try
-        {
-          while(m_running)
-          {
-            while(generic_pool_t::global().poll()) ;
-
-            m_reader(m_workers);
-            m_pinger(m_workers);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-          }
-        }
-        catch(std::exception const &e)
-        {
-          std::cout << "exception: " << e.what() << std::endl;
-          m_running = false;
-          t.detach();
-        }
-      }
-
-      void accept()
-      {
-        /* Dedicated thread for accepting connections. */
-        try
-        {
-          while(m_running)
-          {
-            auto res(m_listener.accept());
-            std::cout << "accepted connection from "
-              << res.sender << std::endl;
-            generic_pool_t::global().post(res);
-          }
-        }
-        catch(std::exception const &e)
-        {
-          m_running = false;
-          std::cout << "acception: " << e.what() << std::endl;
-        }
-      }
-
+      void run();
+      void render();
 
     private:
-      void added_worker(net::socket::accept_result const &res)
-      {
-        auto const shared(std::make_shared<worker>(res.sender, res.sock));
-        m_workers.emplace(std::make_pair(res.sender, shared));
-
-        generic_pool_t::global().post(worker_added{ res.sender, shared, });
-      }
+      void added_worker(net::socket::accept_result const &res);
+      void accept();
+      void render_impl();
 
       /* Our connection. */
       static net::port_t constexpr m_port{ 2272 };
@@ -101,5 +56,14 @@ namespace server
       /* Operators. */
       op::reader m_reader;
       op::pinger m_pinger{ std::chrono::milliseconds(100) };
+
+      /* UI */
+      shared::term::context m_context;
+      shared::term::window m_root_window;
+      std::string m_root_body;
+      ui::home m_home_window;
+      std::mutex m_render_mutex;
+      std::condition_variable m_render_condition;
+      bool m_should_render{ false };
   };
 }

@@ -17,8 +17,8 @@ namespace shared
     {
       m_attrib_state.fg = static_cast<attrib_t>(color_attrib::red);
       m_attrib_state.bg = static_cast<attrib_t>(color_attrib::black);
-      set_width(50);
-      set_height(20);
+      set_width(2);
+      set_height(2);
     }
 
     void window::set_x(pos_t const x)
@@ -69,12 +69,15 @@ namespace shared
     void window::set_bg(attrib_t const bg)
     { m_attrib_state.bg = bg; }
 
-    void window::draw()
+    void window::set_title(std::string const &t)
+    { m_title = t; }
+
+    void window::render()
     {
       for(pos_t x{}; x < m_width - 1; ++x)
       {
         for(pos_t y{}; y < m_height - 1; ++y)
-        { draw(x, y, " "); }
+        { render(x, y, " "); }
       }
 
       /* Horizontal */
@@ -82,54 +85,57 @@ namespace shared
       {
         m_borders.t.x = i;
         m_borders.t.y = -1;
-        draw(m_borders.t);
+        render(m_borders.t);
 
         m_borders.b.x = i;
         m_borders.b.y = m_height - 1;
-        draw(m_borders.b);
+        render(m_borders.b);
       }
       /* Vertical */
       for(pos_t i{ -1 }; i < m_height; ++i)
       {
         m_borders.l.x = -1;
         m_borders.l.y = i;
-        draw(m_borders.l);
+        render(m_borders.l);
 
         m_borders.r.x = m_width - 1;
         m_borders.r.y = i;
-        draw(m_borders.r);
+        render(m_borders.r);
       }
       /* Corners */
       m_borders.tl.x = m_borders.tl.y = -1;
-      draw(m_borders.tl);
+      render(m_borders.tl);
 
       m_borders.tr.x = m_width - 1;
       m_borders.tr.y = -1;
-      draw(m_borders.tr);
+      render(m_borders.tr);
 
       m_borders.br.x = m_width - 1;
       m_borders.br.y = m_height - 1;
-      draw(m_borders.br);
+      render(m_borders.br);
 
       m_borders.bl.x = -1;
       m_borders.bl.y = m_height - 1;
-      draw(m_borders.bl);
+      render(m_borders.bl);
 
       /* Title */
-      text t;
-      t.data = "This is a really long title";
-      t.sty.align = alignment::center;
-      t.sty.color = coloring::inherit_fg;
-      t.y = -1;
-      draw(t);
+      if(m_title.size())
+      {
+        text t;
+        t.data = m_title;
+        t.sty.align = alignment::center;
+        t.sty.color = coloring::inherit_fg;
+        t.y = -1;
+        render(t);
+      }
     }
 
-    void window::draw(pos_t const ox, pos_t const oy, char const * const str,
+    void window::render(pos_t const ox, pos_t const oy, char const * const str,
         style const s)
-    { draw(ox, oy, std::string{ str }, s); }
+    { render(ox, oy, std::string{ str }, s); }
 
     /* Single unicode char, no coloring. */
-    void window::draw(pos_t const x, pos_t const y, unicode_t const c)
+    void window::render(pos_t const x, pos_t const y, unicode_t const c)
     {
       set_cursor(x, y);
       tb_change_cell(m_inside_x + x, m_inside_y + y, c,
@@ -138,7 +144,7 @@ namespace shared
     }
 
     /* Pre-built cells, possible coloring. */
-    void window::draw(pos_t const x, pos_t const y, cell const &c)
+    void window::render(pos_t const x, pos_t const y, cell const &c)
     { 
       attrib_t fg{}, bg{};
       if(c.fg.color != color_attrib::none)
@@ -157,13 +163,13 @@ namespace shared
       increment_cursor();
     }
 
-    void window::draw(pos_t x, pos_t y, cell_string const &str)
+    void window::render(pos_t x, pos_t y, cell_string const &str)
     {
       for(auto const &c : str)
-      { draw(x++, y, c); }
+      { render(x++, y, c); }
     }
 
-    void window::draw_cell(pos_t const x, pos_t const y, char const ch,
+    void window::render_cell(pos_t const x, pos_t const y, char const ch,
         attrib_t const fg, attrib_t const bg)
     {
       set_cursor(x, y);
@@ -173,7 +179,7 @@ namespace shared
       increment_cursor();
     }
 
-    void window::draw_cell(pos_t const x, pos_t const y, cell const c,
+    void window::render_cell(pos_t const x, pos_t const y, cell const c,
         attrib_t const fg, attrib_t const bg)
     {
       set_cursor(x, y);
@@ -181,7 +187,7 @@ namespace shared
       increment_cursor();
     }
 
-    void window::draw_cell(pos_t const x, pos_t const y, unicode_t const ch,
+    void window::render_cell(pos_t const x, pos_t const y, unicode_t const ch,
         attrib_t const fg, attrib_t const bg)
     {
       set_cursor(x, y);

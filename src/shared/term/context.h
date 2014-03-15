@@ -52,11 +52,22 @@ namespace shared
         { return m_height; }
 
         void set_cursor(pos_t const x, pos_t const y)
-        { tb_set_cursor(m_cursor_x = x, m_cursor_y = y); }
+        {
+          m_cursor_x = x;
+          m_cursor_y = y;
+          if(m_show_cursor)
+          { tb_set_cursor(m_cursor_x, m_cursor_y); }
+        }
         void hide_cursor()
-        { tb_set_cursor(TB_HIDE_CURSOR, TB_HIDE_CURSOR); }
+        {
+          m_show_cursor = false;
+          tb_set_cursor(TB_HIDE_CURSOR, TB_HIDE_CURSOR);
+        }
         void show_cursor()
-        { tb_set_cursor(m_cursor_x, m_cursor_y); }
+        {
+          m_show_cursor = true;
+          tb_set_cursor(m_cursor_x, m_cursor_y);
+        }
         pos_t get_cursor_x() const
         { return m_cursor_x; }
         pos_t get_cursor_y() const
@@ -89,6 +100,7 @@ namespace shared
         attrib_t m_clear_fg{}, m_clear_bg{};
         pos_t m_width{}, m_height{};
         pos_t m_cursor_x{}, m_cursor_y{};
+        bool m_show_cursor{ false };
     };
   }
 }

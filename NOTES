@@ -34,10 +34,10 @@ Flow
 
 Tasks (in somewhat-chronological order)
   [X] Get server listening to TCP connections
-  [ ] Compose some serialization/deserialization tactic
+  [X] Compose some serialization/deserialization tactic
       for sending data
-  [ ] Ping test those connections regularly (pinger operator)
+  [X] Ping test those connections regularly (pinger operator)
     [ ] Handle dead workers using RAII
   [ ] Start collecting CPU information from workers
-    [ ] Flush out reader operator to send notifications
+    [X] Flush out reader operator to send notifications
   [ ] Build TUI for server

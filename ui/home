@@ -1,0 +1,35 @@
+Home (shortcut 1)
+  1. Hosts
+    a) Host info
+    b) Project info
+    c) Worker info (select a worker to view its log)
+  2. Project stats
+    a) Number of hosts
+    b) Number of workers
+    c) Number of ...
+  3. System stats
+    a) Load average
+    b) Cpu usage (cpu bars like htop)
+    c) Thread count
+  4. Internal/external IP
+|-----------------------------------------------|
+|                                 |             |
+|                                 |             |
+|                                 |             |
+|                                 |      2      |
+|                                 |             |
+|                                 |             |
+|                                 |             |
+|                                 |-------------|
+|                1                |      4      |
+|                                 |-------------|
+|                                 |             |
+|                                 |             |
+|                                 |             |
+|                                 |             |
+|                                 |      3      |
+|                                 |             |
+|                                 |             |
+|                                 |             |
+|-----------------------------------------------|
+

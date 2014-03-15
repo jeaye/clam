@@ -12,7 +12,8 @@ SHARED_SOURCES= \
 							 src/shared/term/window.cpp \
 							 src/shared/protocol/message.cpp
 SERVER_SOURCES= \
-							 src/server/main.cpp
+							 src/server/main.cpp \
+							 src/server/core.cpp
 CLIENT_SOURCES= \
 							 src/client/main.cpp
 

@@ -19,7 +19,7 @@ namespace shared
   {
     namespace receiver
     {
-      void receive(std::shared_ptr<network::socket> const sock)
+      inline void receive(std::shared_ptr<network::socket> const sock)
       {
         array_buffer arr;
         auto read(sock->receive(arr.data(), arr.size()));
