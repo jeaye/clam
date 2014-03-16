@@ -8,12 +8,14 @@
 SHARED_SOURCES= \
 							 src/shared/network/socket.cpp \
 							 src/shared/network/address.cpp \
+							 src/shared/network/ip.cpp \
 							 src/shared/term/context.cpp \
 							 src/shared/term/window.cpp \
 							 src/shared/protocol/message.cpp
 SERVER_SOURCES= \
 							 src/server/main.cpp \
-							 src/server/core.cpp
+							 src/server/core.cpp \
+							 src/server/log/logger.cpp
 CLIENT_SOURCES= \
 							 src/client/main.cpp
 
@@ -40,7 +42,7 @@ CXX_PLATFORM_FLAGS=%CXX_PLATFORM_FLAGS_IN%
 CXX_FLAGS=-std=c++1y $(CXX_WARN) $(CXX_NOWARN) $(CXX_OPT) $(CXX_INCLUDE) $(CXX_PLATFORM_FLAGS) -c
 
 LD_PLATFORM_LIBS=%LD_PLATFORM_LIBS_IN%
-LD_LIBS=-lpthread -lboost_serialization -L lib/termbox/build/src -ltermbox $(LD_PLATFORM_LIBS)
+LD_LIBS=-lpthread -lboost_serialization -L lib/termbox/build/src -ltermbox -lcurl $(LD_PLATFORM_LIBS)
 
 COLOR_OFF=$(shell tput sgr0)
 COLOR_GREEN=$(shell tput setaf 2)

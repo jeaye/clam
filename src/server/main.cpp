@@ -12,11 +12,8 @@
 #include <chrono>
 
 #include "core.h"
+#include "log/logger.h"
 
-/* TODO: Remove all instances of std::cout.
- * Provide logging capabilities.
- *  Logs based on address
- *    System is localhost */
 int main(int const, char ** const)
 {
   try
@@ -32,6 +29,7 @@ int main(int const, char ** const)
      *
      *  Titles too long? Cut off to show border
      */ 
+    log_system("Creating server core");
     server::core core;
     core.run();
   }

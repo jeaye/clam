@@ -50,7 +50,7 @@ namespace server
       net::socket m_listener;
       bool m_running{ true };
 
-      /* Only the core should own the workers -- everyone else use weak_ptr. */
+      /* Only the core should own the workers -- XXX: everyone else use weak_ptr. */
       std::map<net::address, std::shared_ptr<worker>> m_workers;
 
       /* Operators. */

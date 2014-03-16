@@ -3,6 +3,10 @@ Home (shortcut 1)
     a) Host info
     b) Project info
     c) Worker info (select a worker to view its log)
+     - Ping
+     - Current jobs
+     - Log
+     - CPU
   2. Project stats
     a) Number of hosts
     b) Number of workers

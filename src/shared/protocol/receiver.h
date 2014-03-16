@@ -28,8 +28,7 @@ namespace shared
         char *data{ arr.data() };
         if(read)
         {
-          //std::cout << "sender: " << sender << std::endl;
-          //std::cout << "read: " << read << std::endl;
+          //log_worker(sender, "read: %%", read);
 
           while(processed < read)
           {
@@ -38,8 +37,8 @@ namespace shared
             processed += hdr_text.size() + 1;
             data += hdr_text.size() + 1;
 
-            //std::cout << "hdr size: " << hdr_text.size() << std::endl;
-            //std::cout << "header: " << hdr_text << std::endl;
+            //log_worker(sender, "hdr size: %%", hdr_text.size());
+            //log_worker(sender, "header: %%", hdr_text);
 
             header const hdr(deserialize<header>(hdr_text));
             if(hdr.size > max_message_size)
@@ -58,8 +57,8 @@ namespace shared
             processed += body_text.size() + 1;
             data += body_text.size() + 1;
 
-            //std::cout << "body size: " << body_text.size() << std::endl;
-            //std::cout << "body: " << body_text << std::endl;
+            //log_worker(sender, "body size: %%", body_text.size());
+            //log_worker(sender, "body: %%", body_text);
 
             auto const msg(static_cast<int>(hdr.msg));
             if(msg < 0)

@@ -8,6 +8,7 @@
 */
 
 #include "core.h"
+#include "log/logger.h"
 
 namespace server
 {
@@ -68,7 +69,7 @@ namespace server
     }
     catch(std::exception const &e)
     {
-      std::cout << "core exception: " << e.what() << std::endl;
+      log_system("core exception: %%", e.what());
       m_running = false;
 
       /* Wake up the render thread. */
@@ -104,15 +105,14 @@ namespace server
       while(m_running)
       {
         auto res(m_listener.accept());
-        std::cout << "accepted connection from "
-                  << res.sender << std::endl;
+        log_worker(res.sender, "accepted connection");
         generic_pool_t::global().post(res);
       }
     }
     catch(std::exception const &e)
     {
       m_running = false;
-      std::cout << "acception: " << e.what() << std::endl;
+      log_system("acception: %%", e.what());
     }
   }
 
@@ -133,7 +133,11 @@ namespace server
 
         m_context.clear();
         m_root_window.render();
-        m_root_window.render(0, 0, m_root_body);
+
+        /* XXX: Read-only access while other threads may be *adding* lines only. */
+        for(size_t i{}; i < logging::chrono_buffer.size(); ++i)
+        { m_root_window.render(0, i, logging::chrono_buffer[i].get()); }
+
         m_home_window.render();
         m_context.present();
         m_context.poll();
@@ -144,7 +148,7 @@ namespace server
     catch(std::exception const &e)
     {
       m_running = false;
-      std::cout << "render exception: " << e.what() << std::endl;
+      log_system("render exception: %%" ,e.what());
     }
   }
 }

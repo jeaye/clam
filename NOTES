@@ -41,3 +41,5 @@ Tasks (in somewhat-chronological order)
   [ ] Start collecting CPU information from workers
     [X] Flush out reader operator to send notifications
   [ ] Build TUI for server
+    [ ] Design UI flow
+    [ ] Logging system

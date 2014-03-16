@@ -13,8 +13,8 @@
 #include "../generic_pool.h"
 #include "shared/protocol/serialize.h"
 #include "shared/protocol/sender.h"
+#include "../log/logger.h"
 
-#include <iostream>
 #include <memory>
 #include <chrono>
 #include <map>
@@ -29,7 +29,6 @@ namespace server
 {
   namespace op
   {
-    /* TODO: listen for pongs. */
     class pinger
     {
       public:
@@ -69,7 +68,7 @@ namespace server
               auto const diff(now - it->second.last);
               if(diff > m_timeout)
               {
-                std::cout << "slow ping; removing worker at " << shared->get_address() << std::endl;
+                log_worker(shared->get_address(), "slow ping; removing worker");
                 workers.erase(shared->get_address());
               }
               ++it;
@@ -90,7 +89,7 @@ namespace server
 
         void ponged(proto::event<proto::pong> const &ev)
         {
-          std::cout << "ponged from " << ev.sender << std::endl;
+          //log_worker(ev.sender, "ponged");
           auto const it(m_workers.find(ev.sender));
           if(it != m_workers.end())
           {
