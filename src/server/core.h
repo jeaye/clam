@@ -60,7 +60,6 @@ namespace server
       /* UI */
       shared::term::context m_context;
       shared::term::window m_root_window;
-      std::string m_root_body;
       ui::home m_home_window;
       std::mutex m_render_mutex;
       std::condition_variable m_render_condition;

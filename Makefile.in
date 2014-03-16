@@ -15,7 +15,8 @@ SHARED_SOURCES= \
 SERVER_SOURCES= \
 							 src/server/main.cpp \
 							 src/server/core.cpp \
-							 src/server/log/logger.cpp
+							 src/server/log/logger.cpp \
+							 src/server/ui/home.cpp
 CLIENT_SOURCES= \
 							 src/client/main.cpp
 

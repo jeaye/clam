@@ -26,17 +26,12 @@ namespace server
     m_root_window.set_pos(1, 1);
     m_root_window.set_dimensions(m_context.get_width() - 2,
                                  m_context.get_height() - 2);
+
     shared::term::context::pool_t::global().subscribe<shared::term::key_event>(
     [&](shared::term::key_event const &ev)
     {
       if(ev.k == shared::term::key::escape)
       { throw std::runtime_error("escape pressed"); }
-      if(ev.ch)
-      { m_root_body += ev.ch; }
-      else if(ev.k == shared::term::key::enter)
-      { m_root_body += '\n'; }
-      else if(ev.k == shared::term::key::backspace2 && m_root_body.size())
-      { m_root_body.erase(m_root_body.end() - 1); }
     });
     shared::term::context::pool_t::global().subscribe<shared::term::resize_event>(
     [&](shared::term::resize_event const &ev)
