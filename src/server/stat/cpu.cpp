@@ -11,7 +11,7 @@
 
 #include <chrono>
 #include <thread>
-#include <cstdlib> // TODO: Use better rand
+#include <random>
 
 #ifdef __APPLE__
 # include <mach/mach_init.h>
@@ -31,10 +31,13 @@ namespace server
       static constexpr const float max{ 0.51270f };
       static constexpr const float diff_min{ 0.0042f };
       static constexpr const float diff_max{ 0.018f };
+      static std::random_device rd;
+      static std::mt19937 gen(rd());
+      static std::uniform_int_distribution<> dis(0, RAND_MAX);
 
       float diff{ ((diff_max - diff_min) *
-                  (static_cast<float>(rand()) / RAND_MAX)) + diff_min };
-      diff *= (rand() % 2) ? 1.0f : -1.0f;
+                  (static_cast<float>(dis(gen)) / RAND_MAX)) + diff_min };
+      diff *= (dis(gen) % 2) ? 1.0f : -1.0f;
       last += diff;
       last = std::max(last, min);
       last = std::min(last, max);
