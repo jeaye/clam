@@ -112,7 +112,7 @@ namespace shared
       return (1.0f - (vmstat.free_count / total)) * 100.0f;
     }
 #else
-    static float free_ram()
+    float free_ram()
     { return 0.0f; }
 #endif
 

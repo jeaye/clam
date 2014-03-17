@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <ctime>
 #include <chrono>
+#include <array>
 
 #include "logger.h"
 
@@ -22,9 +23,16 @@ namespace server
 
     void save(net::address const &a, std::string const &log)
     {
-      auto const now(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
       std::stringstream ss;
-      ss << "[" << std::put_time(std::localtime(&now), "%T") << "]: ";
+#ifdef __APPLE__
+      auto const now(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+      ss << std::put_time(std::localtime(&now), "[%T] ");
+#else
+      std::time_t t{ std::time(nullptr) };
+      std::array<char, 256> buff;
+      if(std::strftime(buff.data(), buff.size(), "[%T] ", std::localtime(&t)))
+      { ss << buff.data(); }
+#endif
 
       if(a == net::address{})
       { ss << "(system) "; }
