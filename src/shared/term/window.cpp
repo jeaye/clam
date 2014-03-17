@@ -45,6 +45,12 @@ namespace shared
     void window::set_dimensions(pos_t const w, pos_t const h)
     { set_width(w); set_height(h); }
 
+    pos_t window::get_width() const
+    { return m_width; }
+
+    pos_t window::get_height() const
+    { return m_height; }
+
     void window::set_cursor(pos_t const x, pos_t const y)
     { context::global().set_cursor(x, y); }
 

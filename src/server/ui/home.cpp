@@ -5,9 +5,10 @@
 
   File: home.cpp
   Author: Jesse 'Jeaye' Wilkerson
-  */
+*/
 
 #include "home.h"
+#include "server/stat/cpu.h"
 
 namespace server
 {
@@ -35,11 +36,14 @@ namespace server
       m_ip_window.render(0, 0, "Internal: " + m_internal_ip);
       m_ip_window.render(0, 1, "External: " + m_external_ip);
       m_cpu_window.render();
+      m_cpu_window.render(0, 0, "CPU Usage:");
+      m_cpu_window.render(0, 1, stat::cpu_bar(m_cpu_window.get_width() - 2));
     }
 
     void home::resize(shared::term::resize_event const &ev)
     {
-      auto const bar_width(ev.width / 4);
+      size_t constexpr const bar_max_width{ 26 };
+      auto const bar_width(std::min<size_t>(ev.width / 4, bar_max_width));
 
       m_ip_window.set_x(ev.width - bar_width);
       m_ip_window.set_y((ev.height / 2) - 3);

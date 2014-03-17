@@ -28,7 +28,7 @@ namespace shared
     {
       std::string get_internal()
       {
-        std::array<char, 256> hostname;
+        std::array<char, 256> hostname; 
         gethostname(hostname.data(), hostname.size());
         hostent * const entry{ gethostbyname(hostname.data()) };
 
@@ -57,12 +57,12 @@ namespace shared
 
           CURLcode const res{ curl_easy_perform(curl.get()) };
           if(res != CURLE_OK)
-          { throw std::runtime_error(std::string{ "Curl error: " } + curl_easy_strerror(res)); }
+          { return "ip error"; }
           else
           { return { buff.data() }; }
         }
         else
-        { throw std::runtime_error("Failed to initialize curl"); }
+        { return "ip error"; }
       }
     }
   }

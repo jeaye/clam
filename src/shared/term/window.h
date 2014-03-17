@@ -46,6 +46,8 @@ namespace shared
         void set_width(pos_t const w);
         void set_height(pos_t const h);
         void set_dimensions(pos_t const w, pos_t const h);
+        pos_t get_width() const;
+        pos_t get_height() const;
 
         void set_fg(attrib_t const fg);
         void set_bg(attrib_t const bg);
