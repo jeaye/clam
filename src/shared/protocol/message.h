@@ -12,6 +12,7 @@
 #include "shared/network/socket.h"
 #include "shared/notif/pool.h"
 #include "ping_pong.h"
+#include "stat.h"
 
 #include <array>
 
@@ -28,6 +29,7 @@ namespace shared
     enum class message
     {
       ping, pong,
+      ask_stat, tell_stat,
       max
     };
     static size_t constexpr max_message_size{ 512 };
@@ -56,6 +58,14 @@ namespace shared
     struct message_enum<pong>
     { static message constexpr value{ message::pong }; };
 
+    template <>
+    struct message_enum<ask_stat>
+    { static message constexpr value{ message::ask_stat }; };
+
+    template <>
+    struct message_enum<tell_stat>
+    { static message constexpr value{ message::tell_stat }; };
+
     /* Conversion to type from enum. */
     template <message M>
     struct message_type;
@@ -67,6 +77,14 @@ namespace shared
     template <>
     struct message_type<message::pong>
     { using type = pong; };
+
+    template <>
+    struct message_type<message::ask_stat>
+    { using type = ask_stat; };
+
+    template <>
+    struct message_type<message::tell_stat>
+    { using type = tell_stat; };
   }
 }
 #include "header.h" /* TODO: ehh, really? */

@@ -45,6 +45,8 @@ namespace server
       m_cpu_window.render(0, 1, shared::stat::cpu_bar(m_cpu_window.get_width() - 2));
       m_cpu_window.render(0, 2, "RAM Usage:");
       m_cpu_window.render(0, 3, shared::stat::ram_bar(m_cpu_window.get_width() - 2));
+
+      /* TODO: Access core's stat collector. */
     }
 
     void home::resize(shared::term::resize_event const &ev)
@@ -55,6 +57,10 @@ namespace server
       size_t constexpr const spacing{ 1 };
       size_t constexpr const cpu_height{ 5 };
       size_t constexpr const ip_height{ 3 };
+
+      m_worker_cpu_window.set_x(ev.width - bar_width);
+      m_worker_cpu_window.set_y(ev.height - cpu_height - ip_height - cpu_height - spacing * 3);
+      m_worker_cpu_window.set_dimensions(bar_width - 1, cpu_height);
 
       m_ip_window.set_x(ev.width - bar_width);
       m_ip_window.set_y(ev.height - cpu_height - ip_height - spacing * 2);

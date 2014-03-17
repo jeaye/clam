@@ -15,6 +15,7 @@
 
 #include "op/reader.h"
 #include "op/pinger.h"
+#include "op/stat_collector.h"
 
 #include "shared/term/context.h"
 #include "shared/term/window.h"
@@ -35,10 +36,14 @@ namespace server
   class core
   {
     public:
+      using worker_map = std::map<net::address, std::shared_ptr<worker>>;
+
       core();
 
       void run();
       void render();
+
+      worker_map const& get_workers() const;
 
     private:
       void added_worker(net::socket::accept_result const &res);
@@ -51,11 +56,12 @@ namespace server
       bool m_running{ true };
 
       /* Only the core should own the workers -- XXX: everyone else use weak_ptr. */
-      std::map<net::address, std::shared_ptr<worker>> m_workers;
+      worker_map m_workers;
 
       /* Operators. */
       op::reader m_reader;
-      op::pinger m_pinger{ std::chrono::milliseconds(100) };
+      op::pinger m_pinger{ std::chrono::milliseconds(1000) };
+      op::stat_collector m_stat_collector;
 
       /* UI */
       shared::term::context m_context;

@@ -3,7 +3,7 @@
   See licensing in LICENSE file, or at:
     http://www.opensource.org/licenses/MIT
 
-  File: ping_pong.h
+  File: stat.h
   Author: Jesse 'Jeaye' Wilkerson
 */
 
@@ -15,8 +15,7 @@ namespace shared
 {
   namespace protocol
   {
-    /* TODO: Send time? Calculate actual ping. */
-    struct ping
+    struct ask_stat
     {
       private:
         template<typename Archive>
@@ -25,12 +24,18 @@ namespace shared
         friend class boost::serialization::access;
     };
 
-    struct pong
+    struct tell_stat
     {
+      float cpu;
+      float ram;
+
       private:
         template<typename Archive>
-        void serialize(Archive &, unsigned int const)
-        { }
+        void serialize(Archive &ar, unsigned int const)
+        {
+          ar & cpu;
+          ar & ram;
+        }
         friend class boost::serialization::access;
     };
   }

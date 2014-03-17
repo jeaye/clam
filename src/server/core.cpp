@@ -57,6 +57,7 @@ namespace server
 
         m_reader(m_workers);
         m_pinger(m_workers);
+        m_stat_collector(m_workers);
 
         render();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -83,6 +84,9 @@ namespace server
     }
     m_render_condition.notify_one();
   }
+
+  core::worker_map const& core::get_workers() const
+  { return m_workers; }
 
   void core::added_worker(net::socket::accept_result const &res)
   {
@@ -130,6 +134,7 @@ namespace server
         m_root_window.render();
 
         /* XXX: Read-only access while other threads may be *adding* lines only. */
+        /* TODO: Render in separate window. */
         for(size_t i{}; i < logging::chrono_buffer.size(); ++i)
         { m_root_window.render(0, i, logging::chrono_buffer[i].get()); }
 

@@ -17,5 +17,7 @@ namespace shared
   {
     std::string cpu_bar(size_t const width);
     std::string ram_bar(size_t const width);
+    float cpu_load();
+    float free_ram();
   }
 }

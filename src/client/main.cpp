@@ -17,6 +17,7 @@
 #include "shared/protocol/message.h"
 #include "shared/protocol/sender.h"
 #include "shared/protocol/receiver.h"
+#include "shared/stat/cpu.h"
 
 namespace net = shared::network;
 namespace proto = shared::protocol;
@@ -32,10 +33,17 @@ int main(int const, char ** const)
 
     proto::pool_t::global().subscribe<proto::event<proto::ping>>([&]
     {
-      std::cout << "pinged" << std::endl;
+      //std::cout << "pinged" << std::endl;
       proto::sender::send(proto::pong{}, sock);
     });
 
+    proto::pool_t::global().subscribe<proto::event<proto::ask_stat>>([&]
+    {
+      //std::cout << "asked stat" << std::endl;
+      proto::sender::send(proto::tell_stat{ shared::stat::cpu_load(), shared::stat::free_ram() }, sock);
+    });
+
+    std::cout << "starting..." << std::endl;
     while(true)
     {
       proto::receiver::receive(sock);

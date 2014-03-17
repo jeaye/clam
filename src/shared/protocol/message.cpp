@@ -34,6 +34,9 @@ namespace shared
 
       subscribe<message::ping>();
       subscribe<message::pong>();
+
+      subscribe<message::ask_stat>();
+      subscribe<message::tell_stat>();
     }
   }
 }

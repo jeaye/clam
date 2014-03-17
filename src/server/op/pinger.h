@@ -29,6 +29,7 @@ namespace server
 {
   namespace op
   {
+    /* TODO: cpp */
     class pinger
     {
       public:
@@ -83,8 +84,8 @@ namespace server
           { throw std::runtime_error("Worker already exists in pinger map"); }
 
           auto const shared(wa.w.lock());
-          proto::sender::send(shared::protocol::ping{}, shared->get_socket());
           m_workers[wa.a] = { wa.w, std::chrono::system_clock::now() };
+          proto::sender::send(shared::protocol::ping{}, shared->get_socket());
         }
 
         void ponged(proto::event<proto::pong> const &ev)
@@ -96,12 +97,13 @@ namespace server
             auto const shared(it->second.w.lock());
             if(shared)
             {
+              /* TODO: Timeout before pinging again. */
               it->second.last = std::chrono::system_clock::now();
               proto::sender::send(shared::protocol::ping{}, shared->get_socket());
             }
           }
           else
-          { throw std::runtime_error("Pong from ghost worker"); }
+          { throw std::runtime_error("Ponged from ghost worker"); }
         }
 
         std::map<net::address, entry> m_workers;

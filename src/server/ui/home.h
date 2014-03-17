@@ -40,6 +40,7 @@ namespace server
         shared::term::window m_stats_window;
         shared::term::window m_ip_window;
         shared::term::window m_cpu_window;
+        shared::term::window m_worker_cpu_window;
         std::string m_internal_ip{ net::ip::get_internal() };
 
         /* External IP needs a web request, so it's set asynchronously. */

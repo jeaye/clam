@@ -60,7 +60,7 @@ namespace shared
       return 1.0f - ret;
     }
 
-    static float cpu_load()
+    float cpu_load()
     {
       host_cpu_load_info_data_t cpuinfo;
       mach_msg_type_number_t count{ HOST_CPU_LOAD_INFO_COUNT };
@@ -70,15 +70,15 @@ namespace shared
         uint64_t total{};
         for(int i{}; i < CPU_STATE_MAX; ++i)
         { total += cpuinfo.cpu_ticks[i]; }
-        return calculate_cpu(cpuinfo.cpu_ticks[CPU_STATE_IDLE], total);
+        return calculate_cpu(cpuinfo.cpu_ticks[CPU_STATE_IDLE], total) * 100.0f;
       }
       else
-      { return pretend_cpu_load(); }
+      { return pretend_cpu_load() * 100.0f; }
     }
 #else
-    static float cpu_load()
+    float cpu_load()
     {
-      return pretend_cpu_load();
+      return pretend_cpu_load() * 100.0f;
     }
 #endif
 
@@ -98,10 +98,10 @@ namespace shared
     }
 
     std::string cpu_bar(size_t const width)
-    { return make_bar(width, cpu_load() * 100.0f); }
+    { return make_bar(width, cpu_load()); }
 
 #ifdef __APPLE__
-    static float free_ram()
+    float free_ram()
     {
       mach_msg_type_number_t count{ HOST_VM_INFO_COUNT };
       vm_statistics_data_t vmstat;
@@ -109,7 +109,7 @@ namespace shared
       { return 0.0f; }
 
       double const total(vmstat.wire_count + vmstat.active_count + vmstat.inactive_count + vmstat.free_count);
-      return vmstat.free_count / total;
+      return (1.0f - (vmstat.free_count / total)) * 100.0f;
     }
 #else
     static float free_ram()
@@ -117,6 +117,6 @@ namespace shared
 #endif
 
     std::string ram_bar(size_t const width)
-    { return make_bar(width, (1.0f - free_ram()) * 100.0f); }
+    { return make_bar(width, free_ram()); }
   }
 }
