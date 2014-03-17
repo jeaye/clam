@@ -20,6 +20,9 @@ namespace server
           std::bind(&home::resize, this, std::placeholders::_1));
 
       m_external_ip_future = std::async(std::launch::async, &net::ip::get_external);
+
+      m_ip_window.set_title("IP");
+      m_cpu_window.set_title("Stats");
     }
 
     void home::render()
@@ -35,10 +38,13 @@ namespace server
       /* TODO: Render port? */
       m_ip_window.render(0, 0, "Internal: " + m_internal_ip);
       m_ip_window.render(0, 1, "External: " + m_external_ip);
+
+      /* TODO: Cache? Don't actually check these each frame. */
       m_cpu_window.render();
       m_cpu_window.render(0, 0, "CPU Usage:");
       m_cpu_window.render(0, 1, stat::cpu_bar(m_cpu_window.get_width() - 2));
-      /* TODO: RAM usage */
+      m_cpu_window.render(0, 2, "RAM Usage:");
+      m_cpu_window.render(0, 3, stat::ram_bar(m_cpu_window.get_width() - 2));
     }
 
     void home::resize(shared::term::resize_event const &ev)
@@ -47,11 +53,11 @@ namespace server
       auto const bar_width(std::min<size_t>(ev.width / 4, bar_max_width));
 
       size_t constexpr const spacing{ 1 };
-      size_t constexpr const cpu_height{ 3 };
+      size_t constexpr const cpu_height{ 5 };
       size_t constexpr const ip_height{ 3 };
 
       m_ip_window.set_x(ev.width - bar_width);
-      m_ip_window.set_y(ev.height - cpu_height - ip_height - spacing);
+      m_ip_window.set_y(ev.height - cpu_height - ip_height - spacing * 2);
       m_ip_window.set_dimensions(bar_width - 1, ip_height);
 
       m_cpu_window.set_x(ev.width - bar_width);

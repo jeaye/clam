@@ -43,7 +43,7 @@ namespace server
         std::string m_internal_ip{ net::ip::get_internal() };
 
         /* External IP needs a web request, so it's set asynchronously. */
-        std::string m_external_ip{ "Calculating..." };
+        std::string m_external_ip{ "Calculating" };
         std::future<std::string> m_external_ip_future;
     };
   }

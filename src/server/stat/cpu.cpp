@@ -82,12 +82,11 @@ namespace server
     }
 #endif
 
-    std::string cpu_bar(size_t const width)
+    std::string make_bar(size_t const width, float const percent)
     {
       if(width < 2)
       { return ""; }
 
-      float const percent{ cpu_load() * 100.0f };
       std::string bar(width, ' ');
       bar[0] = '['; bar[width - 1] = ']';
       for(size_t i{}; i < width - 2; ++i)
@@ -97,5 +96,27 @@ namespace server
       }
       return bar;
     }
+
+    std::string cpu_bar(size_t const width)
+    { return make_bar(width, cpu_load() * 100.0f); }
+
+#ifdef __APPLE__
+    static float free_ram()
+    {
+      mach_msg_type_number_t count{ HOST_VM_INFO_COUNT };
+      vm_statistics_data_t vmstat;
+      if(KERN_SUCCESS != host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vmstat, &count))
+      { return 0.0f; }
+
+      double const total(vmstat.wire_count + vmstat.active_count + vmstat.inactive_count + vmstat.free_count);
+      return vmstat.free_count / total;
+    }
+#else
+    static float free_ram()
+    { return 0.0f; }
+#endif
+
+    std::string ram_bar(size_t const width)
+    { return make_bar(width, (1.0f - free_ram()) * 100.0f); }
   }
 }

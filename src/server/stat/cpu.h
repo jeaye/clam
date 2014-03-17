@@ -16,5 +16,6 @@ namespace server
   namespace stat
   {
     std::string cpu_bar(size_t const width);
+    std::string ram_bar(size_t const width);
   }
 }
