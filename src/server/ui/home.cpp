@@ -38,6 +38,7 @@ namespace server
       m_cpu_window.render();
       m_cpu_window.render(0, 0, "CPU Usage:");
       m_cpu_window.render(0, 1, stat::cpu_bar(m_cpu_window.get_width() - 2));
+      /* TODO: RAM usage */
     }
 
     void home::resize(shared::term::resize_event const &ev)
@@ -45,13 +46,17 @@ namespace server
       size_t constexpr const bar_max_width{ 26 };
       auto const bar_width(std::min<size_t>(ev.width / 4, bar_max_width));
 
+      size_t constexpr const spacing{ 1 };
+      size_t constexpr const cpu_height{ 3 };
+      size_t constexpr const ip_height{ 3 };
+
       m_ip_window.set_x(ev.width - bar_width);
-      m_ip_window.set_y((ev.height / 2) - 3);
-      m_ip_window.set_dimensions(bar_width - 1, 3);
+      m_ip_window.set_y(ev.height - cpu_height - ip_height - spacing);
+      m_ip_window.set_dimensions(bar_width - 1, ip_height);
 
       m_cpu_window.set_x(ev.width - bar_width);
-      m_cpu_window.set_y(ev.height / 2);
-      m_cpu_window.set_dimensions(bar_width - 1, ev.height / 2);
+      m_cpu_window.set_y(ev.height - cpu_height - spacing);
+      m_cpu_window.set_dimensions(bar_width - 1, cpu_height);
     }
   }
 }
