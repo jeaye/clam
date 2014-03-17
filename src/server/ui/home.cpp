@@ -8,7 +8,7 @@
 */
 
 #include "home.h"
-#include "server/stat/cpu.h"
+#include "shared/stat/cpu.h"
 
 namespace server
 {
@@ -22,7 +22,7 @@ namespace server
       m_external_ip_future = std::async(std::launch::async, &net::ip::get_external);
 
       m_ip_window.set_title("IP");
-      m_cpu_window.set_title("Stats");
+      m_cpu_window.set_title("System Stats");
     }
 
     void home::render()
@@ -42,9 +42,9 @@ namespace server
       /* TODO: Cache? Don't actually check these each frame. */
       m_cpu_window.render();
       m_cpu_window.render(0, 0, "CPU Usage:");
-      m_cpu_window.render(0, 1, stat::cpu_bar(m_cpu_window.get_width() - 2));
+      m_cpu_window.render(0, 1, shared::stat::cpu_bar(m_cpu_window.get_width() - 2));
       m_cpu_window.render(0, 2, "RAM Usage:");
-      m_cpu_window.render(0, 3, stat::ram_bar(m_cpu_window.get_width() - 2));
+      m_cpu_window.render(0, 3, shared::stat::ram_bar(m_cpu_window.get_width() - 2));
     }
 
     void home::resize(shared::term::resize_event const &ev)

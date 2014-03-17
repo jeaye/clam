@@ -11,7 +11,7 @@
 
 #include <string>
 
-namespace server
+namespace shared
 {
   namespace stat
   {

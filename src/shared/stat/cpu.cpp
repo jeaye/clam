@@ -20,7 +20,7 @@
 # include <mach/vm_map.h>
 #endif
 
-namespace server
+namespace shared
 {
   namespace stat
   {

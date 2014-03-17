@@ -11,13 +11,13 @@ SHARED_SOURCES= \
 							 src/shared/network/ip.cpp \
 							 src/shared/term/context.cpp \
 							 src/shared/term/window.cpp \
-							 src/shared/protocol/message.cpp
+							 src/shared/protocol/message.cpp \
+							 src/shared/stat/cpu.cpp
 SERVER_SOURCES= \
 							 src/server/main.cpp \
 							 src/server/core.cpp \
 							 src/server/log/logger.cpp \
-							 src/server/ui/home.cpp \
-							 src/server/stat/cpu.cpp
+							 src/server/ui/home.cpp
 CLIENT_SOURCES= \
 							 src/client/main.cpp
 
