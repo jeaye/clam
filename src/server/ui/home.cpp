@@ -9,12 +9,14 @@
 
 #include "home.h"
 #include "shared/stat/cpu.h"
+#include "server/core.h"
 
 namespace server
 {
   namespace ui
   {
-    home::home()
+    home::home(core &c)
+      : m_core(c)
     {
       shared::term::context::pool_t::global().subscribe<shared::term::resize_event>(
           std::bind(&home::resize, this, std::placeholders::_1));
@@ -23,6 +25,7 @@ namespace server
 
       m_ip_window.set_title("IP");
       m_cpu_window.set_title("System Stats");
+      m_worker_cpu_window.set_title("Worker Stats");
     }
 
     void home::render()
@@ -46,7 +49,18 @@ namespace server
       m_cpu_window.render(0, 2, "RAM Usage:");
       m_cpu_window.render(0, 3, shared::stat::ram_bar(m_cpu_window.get_width() - 2));
 
-      /* TODO: Access core's stat collector. */
+      /* TODO: Check the *selected* worker, not just the first. */
+      auto const &workers(m_core.get_workers());
+      if(workers.size())
+      {
+        auto const beg(workers.begin());
+        auto const stats(m_core.worker_stat(beg->first));
+        m_worker_cpu_window.render();
+        m_worker_cpu_window.render(0, 0, "CPU Usage:");
+        m_worker_cpu_window.render(0, 1, shared::stat::make_bar(m_cpu_window.get_width() - 2, stats.cpu));
+        m_worker_cpu_window.render(0, 2, "RAM Usage:");
+        m_worker_cpu_window.render(0, 3, shared::stat::make_bar(m_cpu_window.get_width() - 2, stats.ram));
+      }
     }
 
     void home::resize(shared::term::resize_event const &ev)

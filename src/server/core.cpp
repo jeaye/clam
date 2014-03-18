@@ -88,6 +88,9 @@ namespace server
   core::worker_map const& core::get_workers() const
   { return m_workers; }
 
+  op::stat_collector::entry core::worker_stat(net::address const &a)
+  { return m_stat_collector[a]; }
+
   void core::added_worker(net::socket::accept_result const &res)
   {
     auto const shared(std::make_shared<worker>(res.sender, res.sock));

@@ -15,6 +15,7 @@ namespace shared
 {
   namespace stat
   {
+    std::string make_bar(size_t const width, float const percent);
     std::string cpu_bar(size_t const width);
     std::string ram_bar(size_t const width);
     float cpu_load();

@@ -67,6 +67,17 @@ namespace server
           }
         }
 
+        entry operator [](net::address const &a)
+        {
+          auto const it(m_workers.find(a));
+          if(it == m_workers.end())
+          {
+            log_worker(a, "Worker not found in stat_collector");
+            throw std::runtime_error("Unknown worker");
+          }
+          return it->second;
+        }
+
       private:
         void added_worker(worker_added const &wa)
         {
@@ -81,7 +92,7 @@ namespace server
 
         void ponged(proto::event<proto::tell_stat> const &ev)
         {
-          log_worker(ev.sender, "told stat");
+          //log_worker(ev.sender, "told stat");
           auto const it(m_workers.find(ev.sender));
           if(it != m_workers.end())
           {
@@ -90,7 +101,7 @@ namespace server
             {
               it->second.cpu = ev.data.cpu;
               it->second.ram = ev.data.ram;
-              log_worker(ev.sender, "cpu: %% ram: %%", ev.data.cpu, ev.data.ram);
+              //log_worker(ev.sender, "cpu: %% ram: %%", ev.data.cpu, ev.data.ram);
               /* TODO: Timeout before asking again. */
               proto::sender::send(shared::protocol::ask_stat{}, shared->get_socket());
             }

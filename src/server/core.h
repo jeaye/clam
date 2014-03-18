@@ -43,7 +43,9 @@ namespace server
       void run();
       void render();
 
+      /* Expose data collected from operators. */
       worker_map const& get_workers() const;
+      op::stat_collector::entry worker_stat(net::address const &a);
 
     private:
       void added_worker(net::socket::accept_result const &res);
@@ -66,7 +68,7 @@ namespace server
       /* UI */
       shared::term::context m_context;
       shared::term::window m_root_window;
-      ui::home m_home_window;
+      ui::home m_home_window{ *this };
       std::mutex m_render_mutex;
       std::condition_variable m_render_condition;
       bool m_should_render{ false };

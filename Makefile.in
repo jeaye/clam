@@ -56,14 +56,14 @@ PREFIX=$(COLOR_GREEN)»»»$(COLOR_OFF)
 
 .SILENT:
 
-all: setup clean client server
+all: setup client server
 	echo "$(PREFIX) Success"
 
-setup:
+setup: clean
 	echo "$(PREFIX) Preparing"
 	mkdir -p bin obj
 
-clean: setup
+clean:
 	rm -f bin/client bin/server
 	rm -rf $(OBJ_DIR)
 	echo "$(PREFIX) Cleaned"
@@ -71,7 +71,7 @@ clean: setup
 client: client_setup client_link
 	echo "$(PREFIX) Done"
 
-client_setup: setup
+client_setup: setup 
 	echo "$(PREFIX) Building client"
 
 client_link: setup $(CLIENT_OBJECTS)
@@ -81,7 +81,7 @@ client_link: setup $(CLIENT_OBJECTS)
 server: server_setup server_link
 	echo "$(PREFIX) Done"
 
-server_setup: setup
+server_setup: setup 
 	echo "$(PREFIX) Building server"
 
 server_link: setup $(SERVER_OBJECTS)

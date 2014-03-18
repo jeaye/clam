@@ -20,12 +20,15 @@ namespace net = shared::network;
 
 namespace server
 {
+  class core;
+
   namespace ui
   {
     class home
     {
       public:
-        home();
+        home() = delete;
+        home(core &c);
         home(home const&) = delete;
         home(home &&) = delete;
         home& operator =(home const&) = delete;
@@ -46,6 +49,8 @@ namespace server
         /* External IP needs a web request, so it's set asynchronously. */
         std::string m_external_ip{ "Calculating" };
         std::future<std::string> m_external_ip_future;
+
+        core &m_core;
     };
   }
 }
