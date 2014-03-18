@@ -18,6 +18,8 @@
 # include <mach/mach_error.h>
 # include <mach/mach_host.h>
 # include <mach/vm_map.h>
+#else
+# include <fstream>
 #endif
 
 namespace shared
@@ -78,7 +80,37 @@ namespace shared
 #else
     float cpu_load()
     {
-      return pretend_cpu_load() * 100.0f;
+      static uint64_t previous_user, previous_user_low, previous_sys, previous_idle;
+      double percent{};
+      uint64_t user{}, user_low{}, sys{}, idle{}, total{};
+
+      std::ifstream file{ "/proc/stat" };
+      if(!file.is_open())
+      { percent = pretend_cpu_load() * 100.0f; }
+      else
+      {
+        file.ignore(4); // 'cpu '
+        file >> user >> user_low >> sys >> idle;
+      }
+
+      if(user < previous_user || user_low < previous_user_low ||
+         sys < previous_sys || idle < previous_idle)
+      { percent = pretend_cpu_load() * 100.0f; }
+      else
+      {
+        total = (user - previous_user) + (user_low - previous_user_low) + (sys - previous_sys);
+        percent = total;
+        total += (idle - previous_idle);
+        percent /= total;
+        percent *= 100.0f;
+      }
+
+      previous_user = user;
+      previous_user_low = user_low;
+      previous_sys = sys;
+      previous_idle = idle;
+
+      return percent;
     }
 #endif
 
@@ -105,7 +137,8 @@ namespace shared
     {
       mach_msg_type_number_t count{ HOST_VM_INFO_COUNT };
       vm_statistics_data_t vmstat;
-      if(KERN_SUCCESS != host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vmstat, &count))
+      if(host_statistics(mach_host_self(), HOST_VM_INFO,
+                         reinterpret_cast<host_info_t>(&vmstat), &count) != KERN_SUCCESS)
       { return 0.0f; }
 
       double const total(vmstat.wire_count + vmstat.active_count + vmstat.inactive_count + vmstat.free_count);
@@ -113,7 +146,23 @@ namespace shared
     }
 #else
     float free_ram()
-    { return 0.0f; }
+    {
+      std::string token;
+      std::ifstream file{ "/proc/meminfo" };
+      if(!file.is_open())
+      { return 0.0f; }
+
+      uint64_t total{}, free{};
+      while(file >> token)
+      {
+        if(token == "MemTotal:")
+        { file >> total; }
+        else if(token == "MemFree:")
+        { file >> free; }
+        file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      }
+      return static_cast<double>(free) / total;
+    }
 #endif
 
     std::string ram_bar(size_t const width)
