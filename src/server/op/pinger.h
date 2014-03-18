@@ -39,13 +39,15 @@ namespace server
         struct entry
         {
           std::weak_ptr<worker> w;
-          time_point_t last;
-          time_point_t delay;
+          /* The last time we pinged. */
+          time_point_t last_ping;
+          /* The last time we received a pong, if any (reset after each ping or pong). */
+          time_point_t last_pong;
         };
 
         pinger() = delete;
         pinger(timeout_t const timeout)
-          : m_timeout(timeout)
+          : m_pong_timeout(timeout)
         {
           generic_pool_t::global().subscribe<worker_added>(
               std::bind(&pinger::added_worker, this, std::placeholders::_1));
@@ -67,24 +69,27 @@ namespace server
             { m_workers.erase(it++); }
             else
             {
-              //auto const last_diff(now - it->second.last);
-              auto const delay_diff(now - it->second.delay);
-              //if(last_diff > m_timeout)
-              //{
-              //  /* TODO: Send worker death note first. */
-              //  log_worker(shared->get_address(), "slow ping; removing worker");
-              //  workers.erase(shared->get_address());
-              //}
-              //else
-              if(delay_diff > m_delay)
+              auto const pong_diff(it->second.last_pong - it->second.last_ping);
+              auto const ping_diff(now - it->second.last_ping);
+
+              /* If we're pinging again and we've not been ponged, or the pong timer has elapsed. */
+              if(((ping_diff > m_ping_delay) && it->second.last_pong == time_point_t{}) ||
+                  (pong_diff > m_pong_timeout))
+              {
+                /* TODO: Send worker death note first. */
+                log_worker(shared->get_address(), "slow ping; removing worker");
+                workers.erase(shared->get_address());
+              }
+              else
+              if(ping_diff > m_ping_delay)
               {
                 log_worker(shared->get_address(), "ping");
-                //it->second.last = std::chrono::system_clock::now();
-                it->second.delay = std::chrono::system_clock::now();
+
+                /* Reset ping and pong. */
+                it->second.last_pong = {};
+                it->second.last_ping = std::chrono::system_clock::now();
                 proto::sender::send(shared::protocol::ping{}, shared->get_socket());
               }
-              //else
-              //{ log_worker(shared->get_address(), "delay: %%", delay_diff.count()); }
               ++it;
             }
           }
@@ -100,8 +105,8 @@ namespace server
           m_workers[wa.a] =
           {
             wa.w,
-            std::chrono::system_clock::now(),
-            std::chrono::system_clock::now()
+            std::chrono::system_clock::now(), /* last_ping */
+            {} /* last_pong */
           };
           proto::sender::send(shared::protocol::ping{}, shared->get_socket());
         }
@@ -115,10 +120,8 @@ namespace server
             auto const shared(it->second.w.lock());
             if(shared)
             {
-              //log_worker(ev.sender, "restarting clocks");
-              //it->second.last = std::chrono::system_clock::now();
-              //it->second.delay = std::chrono::system_clock::now();
-              //proto::sender::send(shared::protocol::ping{}, shared->get_socket());
+              /* Reset pong timer. */
+              it->second.last_pong = std::chrono::system_clock::now();
             }
           }
           else
@@ -126,8 +129,8 @@ namespace server
         }
 
         std::map<net::address, entry> m_workers;
-        timeout_t m_timeout;
-        timeout_t const m_delay{ 5000 };
+        timeout_t const m_ping_delay{ 5000 };
+        timeout_t m_pong_timeout;
     };
   }
 }

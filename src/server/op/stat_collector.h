@@ -41,7 +41,7 @@ namespace server
           std::weak_ptr<worker> w;
           float cpu;
           float ram;
-          time_point_t delay;
+          time_point_t last_ping;
         };
 
         stat_collector()
@@ -66,11 +66,11 @@ namespace server
             { m_workers.erase(it++); }
             else
             {
-              auto const diff(now - it->second.delay);
+              auto const diff(now - it->second.last_ping);
               if(diff > m_delay)
               {
                 log_worker(shared->get_address(), "asking stats");
-                it->second.delay = std::chrono::system_clock::now();
+                it->second.last_ping = std::chrono::system_clock::now();
                 proto::sender::send(shared::protocol::ask_stat{}, shared->get_socket());
               }
               ++it;
@@ -110,10 +110,8 @@ namespace server
             auto const shared(it->second.w.lock());
             if(shared)
             {
-              //log_worker(ev.sender, "cpu: %% ram: %%", ev.data.cpu, ev.data.ram);
               it->second.cpu = ev.data.cpu;
               it->second.ram = ev.data.ram;
-              //it->second.delay = std::chrono::system_clock::now();
             }
           }
           else
