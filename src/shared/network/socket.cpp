@@ -147,7 +147,7 @@ namespace shared
     }
 
     ssize_t socket::receive(void * const data, size_t const size) const
-    { return read(m_socket, data, size); }
+    { return recv(m_socket, data, size, 0); }
 
     socket::from_result socket::receive_from(void *data, size_t const size) const
     {

@@ -33,14 +33,12 @@ int main(int const, char ** const)
 
     proto::pool_t::global().subscribe<proto::event<proto::ping>>([&]
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
       proto::sender::send(proto::pong{}, sock);
-      //std::cout << "pinged" << std::endl;
+      std::cout << "pinged" << std::endl;
     });
 
     proto::pool_t::global().subscribe<proto::event<proto::ask_stat>>([&]
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
       proto::sender::send(proto::tell_stat{ shared::stat::cpu_load(), shared::stat::free_ram() }, sock);
       std::cout << "asked stat" << std::endl;
     });

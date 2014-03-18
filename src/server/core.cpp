@@ -60,7 +60,7 @@ namespace server
         m_stat_collector(m_workers);
 
         render();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
       }
     }
     catch(std::exception const &e)
@@ -107,6 +107,8 @@ namespace server
       while(m_running)
       {
         auto res(m_listener.accept());
+        /* TODO: Needed? */
+        res.sock->set_non_blocking();
         log_worker(res.sender, "accepted connection");
         generic_pool_t::global().post(res);
       }

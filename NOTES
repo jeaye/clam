@@ -33,13 +33,17 @@ Flow
       If we're a worker, just have the server assign us work?
 
 Tasks (in somewhat-chronological order)
+  - Weird timing problems with pinger/stat_collector
   [X] Get server listening to TCP connections
   [X] Compose some serialization/deserialization tactic
       for sending data
   [X] Ping test those connections regularly (pinger operator)
     [ ] Handle dead workers using RAII
-  [ ] Start collecting CPU information from workers
+  [X] Start collecting CPU information from workers
     [X] Flush out reader operator to send notifications
   [ ] Build TUI for server
     [ ] Design UI flow
+      [X] Stats bars
+      [ ] Jobs view; repo, percent complete, num workers, log
+      [ ] Workers view (workers have numbers); number, hostname, address, stats, log
     [X] Logging system

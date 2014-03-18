@@ -33,11 +33,15 @@ namespace server
     class stat_collector
     {
       public:
+        using time_point_t = std::chrono::system_clock::time_point;
+        using timeout_t = std::chrono::milliseconds;
+
         struct entry
         {
           std::weak_ptr<worker> w;
           float cpu;
           float ram;
+          time_point_t delay;
         };
 
         stat_collector()
@@ -54,14 +58,21 @@ namespace server
 
         void operator ()(std::map<net::address, std::shared_ptr<worker>> &)
         {
-          for(auto it(m_workers.cbegin()); it != m_workers.cend(); )
+          auto const now(std::chrono::system_clock::now());
+          for(auto it(m_workers.begin()); it != m_workers.end(); )
           {
             auto const shared(it->second.w.lock());
             if(!shared)
             { m_workers.erase(it++); }
             else
             {
-              /* TODO: work */
+              auto const diff(now - it->second.delay);
+              if(diff > m_delay)
+              {
+                log_worker(shared->get_address(), "asking stats");
+                it->second.delay = std::chrono::system_clock::now();
+                proto::sender::send(shared::protocol::ask_stat{}, shared->get_socket());
+              }
               ++it;
             }
           }
@@ -85,25 +96,24 @@ namespace server
           { throw std::runtime_error("Worker already exists in stat_collector map"); }
 
           auto const shared(wa.w.lock());
-          m_workers[wa.a] = { wa.w, 0.0f, 0.0f };
+          m_workers[wa.a] = { wa.w, 0.0f, 0.0f, std::chrono::system_clock::now() };
           proto::sender::send(shared::protocol::ask_stat{}, shared->get_socket());
           log_worker(wa.a, "Asking for stats");
         }
 
         void ponged(proto::event<proto::tell_stat> const &ev)
         {
-          //log_worker(ev.sender, "told stat");
+          log_worker(ev.sender, "told stat");
           auto const it(m_workers.find(ev.sender));
           if(it != m_workers.end())
           {
             auto const shared(it->second.w.lock());
             if(shared)
             {
+              //log_worker(ev.sender, "cpu: %% ram: %%", ev.data.cpu, ev.data.ram);
               it->second.cpu = ev.data.cpu;
               it->second.ram = ev.data.ram;
-              //log_worker(ev.sender, "cpu: %% ram: %%", ev.data.cpu, ev.data.ram);
-              /* TODO: Timeout before asking again. */
-              proto::sender::send(shared::protocol::ask_stat{}, shared->get_socket());
+              //it->second.delay = std::chrono::system_clock::now();
             }
           }
           else
@@ -111,6 +121,7 @@ namespace server
         }
 
         std::map<net::address, entry> m_workers;
+        timeout_t const m_delay{ 5000 };
     };
   }
 }
