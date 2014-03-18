@@ -24,14 +24,16 @@ namespace server
     void save(net::address const &a, std::string const &log)
     {
       std::stringstream ss;
-#ifdef __APPLE__
       auto const now(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+#ifdef __APPLE__
       ss << std::put_time(std::localtime(&now), "[%T] ");
 #else
-      std::time_t t{ std::time(nullptr) };
+      /* XXX: GCC 4.8 does not have std::put_time -_- */
       std::array<char, 256> buff;
-      if(std::strftime(buff.data(), buff.size(), "[%T] ", std::localtime(&t)))
+      if(std::strftime(buff.data(), buff.size(), "[%T] ", std::localtime(&now)))
       { ss << buff.data(); }
+      else
+      { ss << "[error]"; }
 #endif
 
       if(a == net::address{})
