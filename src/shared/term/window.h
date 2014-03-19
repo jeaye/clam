@@ -56,6 +56,7 @@ namespace shared
 
         void render();
 
+        /* TODO: Return how many lines were rendered. */
         void render(pos_t const ox, pos_t const oy, char const * const str,
                   style const s = style{});
 

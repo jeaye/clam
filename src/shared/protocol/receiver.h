@@ -40,6 +40,7 @@ namespace shared
             //log_worker(sender, "hdr size: %%", hdr_text.size());
             //log_worker(sender, "header: %%", hdr_text);
 
+            /* TODO: May not've read enough for header -- make header fixed size. */
             header const hdr(deserialize<header>(hdr_text));
             if(hdr.size > max_message_size)
             { throw std::out_of_range("Header says message is too large"); }

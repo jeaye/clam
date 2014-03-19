@@ -37,6 +37,7 @@ SERVER_BIN_OBJECTS=$(foreach obj,$(SERVER_OBJECTS), $(addprefix $(OBJ_DIR), $(ob
 CLIENT_BIN=bin/client
 SERVER_BIN=bin/server
 
+# TODO: Provide separate client/server flags
 CXX=c++
 CXX_WARN=-Wall -Wextra -pedantic
 CXX_NOWARN=
