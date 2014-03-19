@@ -55,6 +55,7 @@ namespace shared
           curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, &writer);
           curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &buff);
 
+          /* TODO: What if the router redirected to another site? Validate IP? */
           CURLcode const res{ curl_easy_perform(curl.get()) };
           if(res != CURLE_OK)
           { return "ip error"; }

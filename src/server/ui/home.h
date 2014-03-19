@@ -9,12 +9,7 @@
 
 #pragma once
 
-#include <future>
-#include <chrono>
-
-#include "shared/term/context.h"
-#include "shared/term/window.h"
-#include "shared/network/ip.h"
+#include "bar.h"
 
 namespace net = shared::network;
 
@@ -39,18 +34,8 @@ namespace server
       private:
         void resize(shared::term::resize_event const &ev);
 
-        shared::term::window m_host_window;
-        shared::term::window m_stats_window;
-        shared::term::window m_ip_window;
-        shared::term::window m_cpu_window;
-        shared::term::window m_worker_cpu_window;
-        std::string m_internal_ip{ net::ip::get_internal() };
-
-        /* External IP needs a web request, so it's set asynchronously. */
-        std::string m_external_ip{ "Calculating" };
-        std::future<std::string> m_external_ip_future;
-
         core &m_core;
+        bar m_bar;
     };
   }
 }
