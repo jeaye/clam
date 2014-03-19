@@ -143,7 +143,9 @@ namespace server
         for(size_t i{}; i < logging::chrono_buffer.size(); ++i)
         { m_root_window.render(0, i, logging::chrono_buffer[i].get()); }
 
-        m_home_window.render();
+        /* TODO: Have an actively selected window. home=1, workers=2 */
+        //m_home_window.render();
+        m_workers_window.render();
         m_context.present();
         m_context.poll();
 

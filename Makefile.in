@@ -18,6 +18,7 @@ SERVER_SOURCES= \
 							 src/server/core.cpp \
 							 src/server/log/logger.cpp \
 							 src/server/ui/home.cpp \
+							 src/server/ui/workers.cpp \
 							 src/server/ui/bar.cpp
 CLIENT_SOURCES= \
 							 src/client/main.cpp

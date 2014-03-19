@@ -21,6 +21,7 @@
 #include "shared/term/window.h"
 
 #include "ui/home.h"
+#include "ui/workers.h"
 
 #include <map>
 #include <thread>
@@ -69,6 +70,7 @@ namespace server
       shared::term::context m_context;
       shared::term::window m_root_window;
       ui::home m_home_window{ *this };
+      ui::workers m_workers_window{ *this };
       std::mutex m_render_mutex;
       std::condition_variable m_render_condition;
       bool m_should_render{ false };
