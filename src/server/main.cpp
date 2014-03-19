@@ -25,8 +25,6 @@ int main(int const, char ** const)
      *    term::stream.flush(); // present?
      *  window streams?
      *
-     *  root window?
-     *
      *  Titles too long? Cut off to show border
      */ 
     log_system("Creating server core");

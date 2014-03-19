@@ -64,23 +64,26 @@ namespace server
     void bar::resize(shared::term::resize_event const &ev)
     {
       size_t constexpr const bar_max_width{ 26 };
-      auto const bar_width(std::min<size_t>(ev.width / 4, bar_max_width));
+      m_width = std::min<size_t>(ev.width / 4, bar_max_width);
 
       size_t constexpr const spacing{ 1 };
       size_t constexpr const cpu_height{ 5 };
       size_t constexpr const ip_height{ 3 };
 
-      m_worker_cpu_window.set_x(ev.width - bar_width);
+      m_worker_cpu_window.set_x(ev.width - m_width);
       m_worker_cpu_window.set_y(ev.height - cpu_height - ip_height - cpu_height - spacing * 3);
-      m_worker_cpu_window.set_dimensions(bar_width - 1, cpu_height);
+      m_worker_cpu_window.set_dimensions(m_width - 1, cpu_height);
 
-      m_ip_window.set_x(ev.width - bar_width);
+      m_ip_window.set_x(ev.width - m_width);
       m_ip_window.set_y(ev.height - cpu_height - ip_height - spacing * 2);
-      m_ip_window.set_dimensions(bar_width - 1, ip_height);
+      m_ip_window.set_dimensions(m_width - 1, ip_height);
 
-      m_cpu_window.set_x(ev.width - bar_width);
+      m_cpu_window.set_x(ev.width - m_width);
       m_cpu_window.set_y(ev.height - cpu_height - spacing);
-      m_cpu_window.set_dimensions(bar_width - 1, cpu_height);
+      m_cpu_window.set_dimensions(m_width - 1, cpu_height);
     }
+
+    size_t bar::get_width() const
+    { return m_width; }
   }
 }

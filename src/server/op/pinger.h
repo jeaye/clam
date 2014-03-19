@@ -98,6 +98,7 @@ namespace server
       private:
         void added_worker(worker_added const &wa)
         {
+          /* TODO: What if a worker dies and then comes right back before we remove? */
           if(m_workers.find(wa.a) != m_workers.end())
           { throw std::runtime_error("Worker already exists in pinger map"); }
 
@@ -125,7 +126,10 @@ namespace server
             }
           }
           else
-          { throw std::runtime_error("Ponged from ghost worker"); }
+          {
+            log_system("Ponged from ghost worker: %% with %% total workers", ev.sender, m_workers.size());
+            //throw std::runtime_error("Ponged from ghost worker");
+          }
         }
 
         std::map<net::address, entry> m_workers;

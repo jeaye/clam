@@ -32,8 +32,12 @@ namespace server
         void render();
         void render_worker(std::shared_ptr<worker> const w);
 
+        size_t get_width() const;
+
       private:
         void resize(shared::term::resize_event const &ev);
+
+        size_t m_width{};
 
         shared::term::window m_host_window;
         shared::term::window m_stats_window;

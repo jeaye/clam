@@ -11,6 +11,7 @@
 #include <ctime>
 #include <chrono>
 #include <array>
+#include <fstream>
 
 #include "logger.h"
 
@@ -46,6 +47,8 @@ namespace server
       chrono_buffer.push_back(address_buffer[a].back());
 
       /* TODO: Write to file. */
+      std::ofstream ofs("log.out", std::ios::app);
+      ofs << ss.str();
     }
   }
 }

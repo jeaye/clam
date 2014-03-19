@@ -10,6 +10,8 @@
 #include "workers.h"
 #include "server/core.h"
 
+#include <iterator>
+
 namespace server
 {
   namespace ui
@@ -20,6 +22,29 @@ namespace server
     {
       shared::term::context::pool_t::global().subscribe<shared::term::resize_event>(
           std::bind(&workers::resize, this, std::placeholders::_1));
+      shared::term::context::pool_t::global().subscribe<shared::term::key_event>(
+      [&](shared::term::key_event const &ev)
+      {
+        auto const &workers(m_core.get_workers());
+        if(ev.ch == U'j')
+        {
+          if(++m_selection == static_cast<int32_t>(workers.size()))
+          { m_selection = -1; }
+        }
+        else if(ev.ch == U'k')
+        {
+          if(--m_selection == -2)
+          { m_selection = workers.size() - 1; }
+        }
+        if(m_selection >= 0)
+        {
+          auto beg(workers.begin());
+          std::advance(beg, m_selection);
+          m_selected_worker = beg->second;
+        }
+        else
+        { m_selected_worker.reset(); }
+      });
 
       m_list_window.set_pos(1, 1);
       m_list_window.set_dimensions(shared::term::context::global().get_width() - 2,
@@ -32,24 +57,29 @@ namespace server
 
       m_list_window.render();
       std::stringstream ss;
-      size_t i{};
+      int32_t i{};
       for(auto it(workers.begin()); it != workers.end(); ++i, ++it, ss.str(""))
       {
+        if(i == m_selection)
+        { ss << "> "; }
+        else
+        { ss << "  "; }
+
         ss << "#" << i << ": " << it->first;
         m_list_window.render(0, i, ss.str());
       }
 
       m_bar.render();
-      if(workers.size())
-      {
-        /* TODO: Check the *selected* worker, not just the first. */
-        auto const beg(workers.begin());
-        m_bar.render_worker(beg->second);
-      }
+      auto shared(m_selected_worker.lock());
+      if(shared)
+      { m_bar.render_worker(shared); }
     }
 
     void workers::resize(shared::term::resize_event const &ev)
-    { m_list_window.set_dimensions(ev.width - 2, ev.height - 2); }
+    {
+      m_list_window.set_dimensions(ev.width - 2 - m_bar.get_width(),
+                                   ev.height - 2);
+    }
   }
 }
 

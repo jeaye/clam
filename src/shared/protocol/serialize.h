@@ -11,6 +11,7 @@
 
 #include <string>
 #include <sstream>
+#include <fstream> // TODO
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -25,6 +26,10 @@ namespace shared
       std::ostringstream oss;
       boost::archive::text_oarchive oa{ oss };
       oa << o;
+
+      //std::ofstream ofs("log.out", std::ios::app);
+      //ofs << "serialize: " << oss.str() << "\n";
+
       return oss.str();
     }
 
@@ -34,6 +39,10 @@ namespace shared
       T ret;
       std::istringstream iss{ str };
       boost::archive::text_iarchive ia{ iss };
+
+      //std::ofstream ofs("log.out", std::ios::app);
+      //ofs << "deserialize: " << iss.str() << "\n";
+
       ia >> ret;
       return ret;
     }

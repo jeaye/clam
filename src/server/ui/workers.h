@@ -37,6 +37,10 @@ namespace server
         core &m_core;
         bar m_bar;
         shared::term::window m_list_window;
+
+        /* UI selection */
+        int32_t m_selection{ -1 };
+        std::weak_ptr<worker> m_selected_worker;
     };
   }
 }

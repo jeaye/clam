@@ -15,7 +15,7 @@ namespace shared
   {
     window::window()
     {
-      m_attrib_state.fg = static_cast<attrib_t>(color_attrib::red);
+      m_attrib_state.fg = static_cast<attrib_t>(color_attrib::green);
       m_attrib_state.bg = static_cast<attrib_t>(color_attrib::black);
       set_width(2);
       set_height(2);
