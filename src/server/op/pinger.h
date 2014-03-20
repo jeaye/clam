@@ -10,17 +10,11 @@
 #pragma once
 
 #include "../worker.h"
-#include "../generic_pool.h"
-#include "shared/protocol/serialize.h"
 #include "shared/protocol/sender.h"
-#include "../log/logger.h"
 
 #include <memory>
 #include <chrono>
 #include <map>
-#include <functional>
-#include <string>
-#include <stdexcept>
 
 namespace net = shared::network;
 namespace proto = shared::protocol;
@@ -29,7 +23,6 @@ namespace server
 {
   namespace op
   {
-    /* TODO: cpp */
     class pinger
     {
       public:
@@ -45,96 +38,23 @@ namespace server
           time_point_t last_pong;
         };
 
-        pinger() = delete;
-        pinger(timeout_t const timeout)
-          : m_pong_timeout(timeout)
-        {
-          generic_pool_t::global().subscribe<worker_added>(
-              std::bind(&pinger::added_worker, this, std::placeholders::_1));
-          proto::pool_t::global().subscribe<proto::event<proto::pong>>(
-              std::bind(&pinger::ponged, this, std::placeholders::_1));
-        }
+        pinger();
         pinger(pinger const&) = delete;
         pinger(pinger &&) = default;
         pinger& operator =(pinger const&) = delete;
         pinger& operator =(pinger &&) = default;
 
-        void operator ()(std::map<net::address, std::shared_ptr<worker>> &workers)
-        {
-          auto const now(std::chrono::system_clock::now());
-          for(auto it(m_workers.begin()); it != m_workers.end(); )
-          {
-            auto const shared(it->second.w.lock());
-            if(!shared)
-            { m_workers.erase(it++); }
-            else
-            {
-              auto const pong_diff(it->second.last_pong - it->second.last_ping);
-              auto const ping_diff(now - it->second.last_ping);
-
-              /* If we're pinging again and we've not been ponged, or the pong timer has elapsed. */
-              if(((ping_diff > m_ping_delay) && it->second.last_pong == time_point_t{}) ||
-                  (pong_diff > m_pong_timeout))
-              {
-                /* TODO: Send worker death note first. */
-                log_worker(shared->get_address(), "slow ping; removing worker");
-                workers.erase(shared->get_address());
-              }
-              else
-              if(ping_diff > m_ping_delay)
-              {
-                log_worker(shared->get_address(), "ping");
-
-                /* Reset ping and pong. */
-                it->second.last_pong = {};
-                it->second.last_ping = std::chrono::system_clock::now();
-                proto::sender::send(shared::protocol::ping{}, shared->get_socket());
-              }
-              ++it;
-            }
-          }
-        }
+        void operator ()(std::map<net::address, std::shared_ptr<worker>> &workers);
 
       private:
-        void added_worker(worker_added const &wa)
-        {
-          /* TODO: What if a worker dies and then comes right back before we remove? */
-          if(m_workers.find(wa.a) != m_workers.end())
-          { throw std::runtime_error("Worker already exists in pinger map"); }
-
-          auto const shared(wa.w.lock());
-          m_workers[wa.a] =
-          {
-            wa.w,
-            std::chrono::system_clock::now(), /* last_ping */
-            {} /* last_pong */
-          };
-          proto::sender::send(shared::protocol::ping{}, shared->get_socket());
-        }
-
-        void ponged(proto::event<proto::pong> const &ev)
-        {
-          log_worker(ev.sender, "ponged");
-          auto const it(m_workers.find(ev.sender));
-          if(it != m_workers.end())
-          {
-            auto const shared(it->second.w.lock());
-            if(shared)
-            {
-              /* Reset pong timer. */
-              it->second.last_pong = std::chrono::system_clock::now();
-            }
-          }
-          else
-          {
-            log_system("Ponged from ghost worker: %% with %% total workers", ev.sender, m_workers.size());
-            //throw std::runtime_error("Ponged from ghost worker");
-          }
-        }
+        void added_worker(worker_added const &wa);
+        void ponged(proto::event<proto::pong> const &ev);
 
         std::map<net::address, entry> m_workers;
+
+        /* XXX: Could be constexpr in C++1y. */
         timeout_t const m_ping_delay{ 5000 };
-        timeout_t m_pong_timeout;
+        timeout_t const m_pong_timeout{ 2000 };
     };
   }
 }

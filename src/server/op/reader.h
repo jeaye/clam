@@ -43,8 +43,6 @@ namespace server
           }
           while(proto::pool_t::global().poll());
         }
-
-      private:
     };
   }
 }

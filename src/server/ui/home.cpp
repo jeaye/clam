@@ -25,14 +25,6 @@ namespace server
     void home::render()
     {
       m_bar.render();
-
-      /* TODO: Check the *selected* worker, not just the first. */
-      auto const &workers(m_core.get_workers());
-      if(workers.size())
-      {
-        auto const beg(workers.begin());
-        m_bar.render_worker(beg->second);
-      }
     }
 
     void home::resize(shared::term::resize_event const &)

@@ -42,7 +42,7 @@ namespace server
 
     /* Send an initial resize event. */
     shared::term::context::pool_t::global().post<shared::term::resize_event>(
-        { m_context.get_width(), m_context.get_height(), 0, 0 });
+    { m_context.get_width(), m_context.get_height(), 0, 0 });
   }
 
   void core::run()
@@ -60,7 +60,7 @@ namespace server
         m_stat_collector(m_workers);
 
         render();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
     }
     catch(std::exception const &e)

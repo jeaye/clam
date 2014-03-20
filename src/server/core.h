@@ -63,7 +63,7 @@ namespace server
 
       /* Operators. */
       op::reader m_reader;
-      op::pinger m_pinger{ std::chrono::milliseconds(2000) };
+      op::pinger m_pinger;
       op::stat_collector m_stat_collector;
 
       /* UI */
