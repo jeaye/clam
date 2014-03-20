@@ -23,9 +23,11 @@ namespace server
       shared::term::context::pool_t::global().subscribe<shared::term::resize_event>(
           std::bind(&workers::resize, this, std::placeholders::_1));
       shared::term::context::pool_t::global().subscribe<shared::term::key_event>(
-      [&](shared::term::key_event const &ev)
+      [&](shared::term::key_event const &ev) /* TODO: Proper function */
       {
         auto const &workers(m_core.get_workers());
+
+        /* Navigation. */
         if(ev.ch == U'j')
         {
           if(++m_selection == static_cast<int32_t>(workers.size()))
@@ -36,14 +38,19 @@ namespace server
           if(--m_selection == -2)
           { m_selection = workers.size() - 1; }
         }
-        if(m_selection >= 0)
+
+        /* Decide which worker is selected. */
+        if(m_selection >= 0 && m_selection < static_cast<int32_t>(workers.size()))
         {
           auto beg(workers.begin());
           std::advance(beg, m_selection);
           m_selected_worker = beg->second;
         }
         else
-        { m_selected_worker.reset(); }
+        {
+          m_selection = -1;
+          m_selected_worker.reset();
+        }
       });
 
       m_list_window.set_pos(1, 1);

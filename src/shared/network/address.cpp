@@ -38,7 +38,7 @@ namespace shared
       bool const lt{ lhs.get_address() < rhs.get_address() };
       if(lt)
       { return true; }
-      else if((lhs.get_address() < rhs.get_address()) &&
+      else if((lhs.get_address() == rhs.get_address()) &&
                lhs.get_port() < rhs.get_port())
       { return true; }
       return false;

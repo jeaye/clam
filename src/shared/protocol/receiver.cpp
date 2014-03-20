@@ -62,7 +62,7 @@ namespace shared
         arr.fill('\0');
         auto const read_body(read_size(arr, sock, hdr.size));
         if(read_body != hdr.size)
-        { throw std::length_error("Failed to read body"); }
+        { throw std::length_error("Failed to read body: " + std::to_string(read_body)); }
 
         std::string const body_text{ arr.data() };
         auto const sender(sock->get_address());
