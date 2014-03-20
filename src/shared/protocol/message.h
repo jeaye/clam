@@ -15,6 +15,8 @@
 #include "stat.h"
 
 #include <array>
+#include <iostream>
+#include <type_traits>
 
 namespace net = shared::network;
 
@@ -28,10 +30,25 @@ namespace shared
     /* All different types of messages. */
     enum class message
     {
+      min,
       ping, pong,
       ask_stat, tell_stat,
       max
     };
+
+    /* TODO: cpp */
+    inline std::istream& operator >>(std::istream &is, message &m)
+    {
+      std::underlying_type<message>::type i{};
+      is >> i;
+      m = static_cast<message>(i);
+      if(m <= message::min || m >= message::max)
+      { throw std::out_of_range("Message type is out of range"); }
+      return is;
+    }
+    inline std::ostream& operator <<(std::ostream &os, message const m)
+    { return os << static_cast<std::underlying_type<message>::type>(m); }
+
     static size_t constexpr max_message_size{ 512 };
     using array_buffer = std::array<char, max_message_size>;
     using pool_t = notif::pool<message>;

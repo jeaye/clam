@@ -19,57 +19,54 @@ namespace shared
   {
     namespace receiver
     {
+      /* TODO: cpp */
+      inline size_t read_size(array_buffer &arr, size_t const size)
+      {
+        size_t read{};
+        while(read < size)
+        {
+          /* TODO: Needs timer? Don't get stuck in here. */
+          auto ret(sock->receive(arr.data() + read, size));
+          if(ret < 0)
+          { break; }
+          read += ret;
+        }
+        return read;
+      }
+
       inline void receive(std::shared_ptr<network::socket> const sock)
       {
-        array_buffer arr;
-        auto read(sock->receive(arr.data(), arr.size()));
+        array_buffer arr{};
+
+        /* Deserialize header. */
+        auto const read_hdr(arr, read_size);
+        if(read_hdr != header::max_size)
+        { throw std::length_error("Failed to read header"); }
+
+        std::string const hdr_text{ arr.data() };
+        if(hdr_text.size() != read_hdr)
+        { throw std::length_error("Header size is " +
+                                  std::to_string(hdr_text.size()) +
+                                  " not " + std::to_string(read_hdr)); }
+        header const hdr(deserialize<header>(hdr_text));
+        if(hdr.size > max_message_size)
+        { throw std::out_of_range("Header says message is too large"); }
+
+        /* Deserialize body. */
+        arr.fill('\0');
+        auto const read_body(arr, hdr.size);
+        if(read_body != hdr.size)
+        { throw std::length_error("Failed to read body"); }
+
+        std::string const body_text{ arr.data() };
         auto const sender(sock->get_address());
-        ssize_t processed{};
-        char *data{ arr.data() };
-        if(read)
-        {
-          //log_worker(sender, "read: %%", read);
+        auto const msg(static_cast<int>(hdr.msg));
+        if(msg < 0)
+        { throw std::out_of_range("Negative message type"); }
+        else if(msg >= static_cast<int>(notifiers.size()))
+        { throw std::out_of_range("Out of bounds message type"); }
 
-          while(processed < read)
-          {
-            /* Header. */
-            std::string const hdr_text{ data };
-            processed += hdr_text.size() + 1;
-            data += hdr_text.size() + 1;
-
-            //log_worker(sender, "hdr size: %%", hdr_text.size());
-            //log_worker(sender, "header: %%", hdr_text);
-
-            /* TODO: May not've read enough for header -- make header fixed size. */
-            header const hdr(deserialize<header>(hdr_text));
-            if(hdr.size > max_message_size)
-            { throw std::out_of_range("Header says message is too large"); }
-
-            /* Body. */
-            std::string body_text{ data };
-            if(body_text.empty())
-            {
-              size_t read_body{};
-              while(read_body < hdr.size)
-              { read_body += sock->receive(arr.data() + read_body, arr.size() - read_body); }
-              data = arr.data();
-              body_text.assign(data);
-            }
-            processed += body_text.size() + 1;
-            data += body_text.size() + 1;
-
-            //log_worker(sender, "body size: %%", body_text.size());
-            //log_worker(sender, "body: %%", body_text);
-
-            auto const msg(static_cast<int>(hdr.msg));
-            if(msg < 0)
-            { throw std::out_of_range("Negative message type"); }
-            else if(msg >= static_cast<int>(notifiers.size()))
-            { throw std::out_of_range("Out of bounds message type"); }
-            
-            notifiers[msg](sender, body_text);
-          }
-        }
+        notifiers[msg](sender, body_text);
       }
     }
   }
