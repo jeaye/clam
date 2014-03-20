@@ -13,6 +13,8 @@
 #include "message.h"
 #include "serialize.h"
 
+namespace net = shared::network;
+
 namespace shared
 {
   namespace protocol
@@ -20,28 +22,37 @@ namespace shared
     namespace receiver
     {
       /* TODO: cpp */
-      inline size_t read_size(array_buffer &arr, size_t const size)
+      inline size_t read_size(array_buffer &arr,
+                              std::shared_ptr<net::socket> const sock,
+                              size_t const size)
       {
-        size_t read{};
+        /* Only actually try a few times. If we get no data, give up. */
+        static size_t constexpr const max_tries{ 3 };
+        size_t read{}, tries{};
         while(read < size)
         {
-          /* TODO: Needs timer? Don't get stuck in here. */
+          ++tries;
+
           auto ret(sock->receive(arr.data() + read, size));
           if(ret < 0)
+          { break; }
+          else if(tries == max_tries && read == 0) /* If we've read some, ignore max_tries. */
           { break; }
           read += ret;
         }
         return read;
       }
 
-      inline void receive(std::shared_ptr<network::socket> const sock)
+      inline void receive(std::shared_ptr<net::socket> const sock)
       {
         array_buffer arr{};
 
         /* Deserialize header. */
-        auto const read_hdr(arr, read_size);
-        if(read_hdr != header::max_size)
-        { throw std::length_error("Failed to read header"); }
+        auto const read_hdr(read_size(arr, sock, header::max_size));
+        if(!read_hdr)
+        { return; }
+        else if(read_hdr != header::max_size)
+        { throw std::length_error("Failed to read header: " + std::to_string(read_hdr)); }
 
         std::string const hdr_text{ arr.data() };
         if(hdr_text.size() != read_hdr)
@@ -54,7 +65,7 @@ namespace shared
 
         /* Deserialize body. */
         arr.fill('\0');
-        auto const read_body(arr, hdr.size);
+        auto const read_body(read_size(arr, sock, hdr.size));
         if(read_body != hdr.size)
         { throw std::length_error("Failed to read body"); }
 

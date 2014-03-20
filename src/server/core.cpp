@@ -71,7 +71,7 @@ namespace server
       /* Wake up the render thread. */
       render();
       accept_thread.detach();
-      render_thread.detach();
+      render_thread.join();
     }
   }
 
@@ -147,6 +147,8 @@ namespace server
         //m_home_window.render();
         m_workers_window.render();
         m_context.present();
+
+        /* TODO: Don't handle input on the render thread. */
         m_context.poll();
 
         m_should_render = false;
@@ -155,7 +157,7 @@ namespace server
     catch(std::exception const &e)
     {
       m_running = false;
-      log_system("render exception: %%" ,e.what());
+      log_system("render exception: %%", e.what());
     }
   }
 }

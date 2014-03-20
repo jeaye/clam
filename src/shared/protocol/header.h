@@ -46,7 +46,7 @@ namespace shared
     inline header deserialize<header>(std::string const &str)
     {
       if(str.size() != header::max_size)
-      { throw std::length_error("Deserialized header is corrupt: '" + str + "'")); }
+      { throw std::length_error("Deserialized header is corrupt: '" + str + "'"); }
 
       std::istringstream iss{ str };
       header hdr;
