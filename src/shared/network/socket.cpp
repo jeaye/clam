@@ -22,8 +22,9 @@ namespace shared
 {
   namespace network
   {
-    socket::~socket()
-    { disconnect(); }
+    socket::socket()
+      : m_socket(-1, &socket::destroy)
+    { }
 
     bool socket::initialize()
     {
@@ -46,9 +47,9 @@ namespace shared
     void socket::open(port_t const port)
     {
       /* Create a UDP socket. */
-      m_socket = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+      m_socket = { ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) };
 
-      if(m_socket <= 0)
+      if(m_socket.get() <= 0)
       { throw std::runtime_error("Failed to open socket"); }
 
       sockaddr_in address;
@@ -57,18 +58,18 @@ namespace shared
       address.sin_port = htons(port);
 
       /* Tie the socket to the description. */
-      if(bind(m_socket, reinterpret_cast<sockaddr const*>(&address), sizeof(sockaddr_in)) != 0)
+      if(bind(m_socket.get(), reinterpret_cast<sockaddr const*>(&address), sizeof(sockaddr_in)) != 0)
       { throw std::runtime_error("Failed to bind socket"); }
     }
 
     void socket::listen(port_t const port)
     {
-      m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
-      if(m_socket == -1)
+      m_socket = { ::socket(AF_INET, SOCK_STREAM, 0) };
+      if(m_socket.get() == -1)
       { throw std::runtime_error("Failed to open socket"); }
 
       int const optval{ 1 };
-      if(setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0)
+      if(setsockopt(m_socket.get(), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) != 0)
       { throw std::runtime_error("Failed to configure socket"); }
 
       struct sockaddr_in serv_addr;
@@ -77,19 +78,18 @@ namespace shared
       serv_addr.sin_port = htons(port);
 
       /* Tie the socket to the description. */
-      if(bind(m_socket, reinterpret_cast<sockaddr const*>(&serv_addr), sizeof(sockaddr_in)) != 0)
+      if(bind(m_socket.get(), reinterpret_cast<sockaddr const*>(&serv_addr), sizeof(sockaddr_in)) != 0)
       { throw std::runtime_error("Failed to bind socket"); }
 
-      /* TODO: Var this. */
-      ::listen(m_socket, 10); /* Allow a queue of 10. */
+      ::listen(m_socket.get(), m_max_queue);
     }
 
     socket::accept_result socket::accept()
     {
       struct sockaddr_storage from;
       socklen_t addr_size{ sizeof(from) };
-      int32_t const sock(
-          ::accept(m_socket, reinterpret_cast<sockaddr*>(&from), &addr_size));
+      socket_t const sock(
+          ::accept(m_socket.get(), reinterpret_cast<sockaddr*>(&from), &addr_size));
       if(sock == -1)
       { throw std::runtime_error("Failed to accept TCP connection"); }
 
@@ -100,7 +100,7 @@ namespace shared
 
       /* Build a result summarizing the work. */
       std::shared_ptr<socket> ret{ new socket };
-      ret->m_socket = sock;
+      ret->m_socket = { sock };
       return { { { addr }, ntohs(from_in->sin_port) }, std::move(ret) };
     }
 
@@ -111,43 +111,46 @@ namespace shared
       m_hints.ai_family = AF_UNSPEC;
       m_hints.ai_socktype = SOCK_STREAM;
       m_hints.ai_flags = AI_PASSIVE;
-      int32_t const ret{ getaddrinfo(addr.get_address().c_str(),
+      socket_t const ret{ getaddrinfo(addr.get_address().c_str(),
                                      addr.get_port_str().c_str(),
                                      &m_hints, &m_info) };
       if(ret)
       { throw std::runtime_error("Failed to get address info"); }
 
-      m_socket = ::socket(m_info->ai_family, m_info->ai_socktype, m_info->ai_protocol);
-      if(m_socket == -1)
+      m_socket = { ::socket(m_info->ai_family, m_info->ai_socktype, m_info->ai_protocol) };
+      if(m_socket.get() == -1)
       { throw std::runtime_error("Failed to create socket"); }
 
       /* Attempt to connect to the destination. */
-      if(::connect(m_socket, m_info->ai_addr, m_info->ai_addrlen) == -1)
+      if(::connect(m_socket.get(), m_info->ai_addr, m_info->ai_addrlen) == -1)
       { throw std::runtime_error("Failed to connect socket"); }
     }
 
-    void socket::disconnect() const
+    void socket::disconnect()
+    { m_socket = {}; }
+
+    void socket::destroy(socket_t const sock)
     {
 #if PLATFORM == PLATFORM_WINDOWS
-      ::closesocket(m_socket);
+      ::closesocket(sock);
 #else
-      ::close(m_socket);
+      ::close(sock);
 #endif
     }
 
     ssize_t socket::send(void const * const data, size_t const size) const
-    { return ::write(m_socket, data, size); }
+    { return ::write(m_socket.get(), data, size); }
 
     ssize_t socket::send_to(address const &dest, void const * const data, size_t const size) const
     {
       /* Send the specified data. */
-      return sendto(m_socket, static_cast<char const*>(data), size,
+      return sendto(m_socket.get(), static_cast<char const*>(data), size,
           0, reinterpret_cast<sockaddr*>(
             const_cast<sockaddr_in*>(dest.to_sock_addr_in())), sizeof(sockaddr_in));
     }
 
     ssize_t socket::receive(void * const data, size_t const size) const
-    { return recv(m_socket, data, size, 0); }
+    { return recv(m_socket.get(), data, size, 0); }
 
     socket::from_result socket::receive_from(void *data, size_t const size) const
     {
@@ -160,7 +163,7 @@ namespace shared
       socklen_t from_length{ sizeof(from) };
 
       /* Peek and check if there are any bytes waiting. */
-      ssize_t const received_bytes{ ::recvfrom(m_socket, static_cast<char*>(data), size,
+      ssize_t const received_bytes{ ::recvfrom(m_socket.get(), static_cast<char*>(data), size,
                                     0, reinterpret_cast<sockaddr*>(&from), &from_length) };
 
       if(received_bytes <= 0)
@@ -181,7 +184,7 @@ namespace shared
       socklen_t len{ sizeof(addr) };
       char ipstr[INET6_ADDRSTRLEN]{ 0 };
       port_t port{};
-      getpeername(m_socket, reinterpret_cast<sockaddr*>(&addr), &len);
+      getpeername(m_socket.get(), reinterpret_cast<sockaddr*>(&addr), &len);
 
       /* Deal with both IPv4 and IPv6 */
       if(addr.ss_family == AF_INET)
@@ -205,10 +208,10 @@ namespace shared
       /* Set the socket to perform asynchronous checks instead of synchronous waits. */
 #if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
       int32_t non_blocking{ 1 };
-      return (::fcntl(m_socket, F_SETFL, O_NONBLOCK, non_blocking) != -1);
+      return (::fcntl(m_socket.get(), F_SETFL, O_NONBLOCK, non_blocking) != -1);
 #elif PLATFORM == PLATFORM_WINDOWS
       DWORD non_blocking{ 1 };
-      return (::ioctlsocket(m_socket, FIONBIO, &non_blocking) == 0);
+      return (::ioctlsocket(m_socket.get(), FIONBIO, &non_blocking) == 0);
 #endif
     }
   }

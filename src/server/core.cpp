@@ -107,7 +107,6 @@ namespace server
       while(m_running)
       {
         auto res(m_listener.accept());
-        /* TODO: Needed? */
         res.sock->set_non_blocking();
         log_worker(res.sender, "accepted connection");
         generic_pool_t::global().post(res);

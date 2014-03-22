@@ -10,6 +10,7 @@
 #pragma once
 
 #include "address.h"
+#include "shared/util/resource.h"
 
 #include <memory>
 #include <type_traits>
@@ -22,10 +23,11 @@ namespace shared
     class socket
     {
       public:
-        socket() = default;
+        using socket_t = int32_t;
+
+        socket();
         socket(socket const&) = delete;
         socket(socket &&) = default;
-        ~socket();
         socket& operator =(socket const&) = delete;
         socket& operator =(socket &&) = default;
 
@@ -62,9 +64,9 @@ namespace shared
         address get_address() const;
 
         /* Disconnects the socket from any open connections. */
-        void close() const
+        void close()
         { disconnect(); }
-        void disconnect() const;
+        void disconnect();
 
         /* Attempts to send the specified data over a TCP connection. */
         ssize_t send(void const * const data, size_t const size) const;
@@ -120,16 +122,18 @@ namespace shared
         template <typename T>
         static void assert_pod()
         { static_assert(std::is_pod<T>::value, "Type must be POD; otherwise use void* overload"); }
+        static void destroy(socket_t const sock);
+
+        util::resource<socket_t, decltype(&destroy)> m_socket;
 
 #if PLATFORM == PLATFORM_WINDOWS
-        SOCKET m_socket{};
         struct hostent *m_host{};
         SOCKADDR_IN hints{};
 #else
-        int32_t m_socket{}; /* TODO: unique_ptr with deleter. */
         addrinfo m_hints;
         addrinfo *m_info{};
 #endif
+        static size_t constexpr const m_max_queue{ 10 };
     };
   }
 }
