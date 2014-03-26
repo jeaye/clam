@@ -67,7 +67,7 @@ all: setup client server
 
 setup: clean
 	echo "$(PREFIX) Preparing"
-	mkdir -p bin obj
+	mkdir -p bin obj log
 
 clean:
 	rm -f bin/client bin/server

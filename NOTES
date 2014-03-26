@@ -33,7 +33,6 @@ Flow
       If we're a worker, just have the server assign us work?
 
 Tasks (in somewhat-chronological order)
-  - Weird timing problems with pinger/stat_collector
   [X] Get server listening to TCP connections
   [X] Compose some serialization/deserialization tactic
       for sending data

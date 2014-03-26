@@ -39,6 +39,7 @@ namespace server
 
         size_t m_width{};
 
+        shared::term::window m_root_window;
         shared::term::window m_host_window;
         shared::term::window m_stats_window;
         shared::term::window m_ip_window;

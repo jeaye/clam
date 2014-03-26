@@ -37,6 +37,7 @@ namespace server
         { m_external_ip = m_external_ip_future.get(); }
       }
 
+      m_root_window.render();
       m_ip_window.render();
       /* TODO: Render port? */
       m_ip_window.render(0, 0, "Internal: " + m_internal_ip);
@@ -69,6 +70,10 @@ namespace server
       size_t constexpr const spacing{ 1 };
       size_t constexpr const cpu_height{ 5 };
       size_t constexpr const ip_height{ 3 };
+
+      m_root_window.set_x(ev.width - m_width);
+      m_root_window.set_y(1);
+      m_root_window.set_dimensions(m_width - 1, ev.height - 2);
 
       m_worker_cpu_window.set_x(ev.width - m_width);
       m_worker_cpu_window.set_y(ev.height - cpu_height - ip_height - cpu_height - spacing * 3);

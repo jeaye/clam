@@ -22,6 +22,11 @@ namespace server
     std::vector<std::reference_wrapper<std::string const>> chrono_buffer;
     std::map<net::address, std::deque<std::string>> address_buffer;
 
+    void initialize()
+    {
+      /* TODO: Delete the log directory. */
+    }
+
     void save(net::address const &a, std::string const &log)
     {
       std::stringstream ss;
@@ -37,17 +42,16 @@ namespace server
       { ss << "[error]"; }
 #endif
 
-      if(a == net::address{})
-      { ss << "(system) "; }
-      else
-      { ss << "(" << a << ") "; }
+      std::stringstream addr_ss;
+      addr_ss << a;
+      std::string const addr{ (a == net::address{}) ? "system" : addr_ss.str() };
+      ss << "(" << addr << ") ";
       ss << log << std::endl;
 
       address_buffer[a].push_back(ss.str());
       chrono_buffer.push_back(address_buffer[a].back());
 
-      /* TODO: Write to file. */
-      std::ofstream ofs("log.out", std::ios::app);
+      std::ofstream ofs("log/" + addr, std::ios::app);
       ofs << ss.str();
     }
   }

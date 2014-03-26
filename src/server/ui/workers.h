@@ -32,11 +32,13 @@ namespace server
         void render();
 
       private:
-        void resize(shared::term::resize_event const &ev);
+        void resize_event(shared::term::resize_event const &ev);
+        void key_event(shared::term::key_event const &ev);
 
         core &m_core;
         bar m_bar;
         shared::term::window m_list_window;
+        shared::term::window m_log_window;
 
         /* UI selection */
         int32_t m_selection{ -1 };

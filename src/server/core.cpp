@@ -14,6 +14,7 @@ namespace server
 {
   core::core()
   {
+    logging::initialize();
     proto::initialize();
     m_listener.listen(m_port);
 
@@ -73,6 +74,11 @@ namespace server
       accept_thread.detach();
       render_thread.join();
     }
+    /* TODO: shared::thread for more RAII. */
+    if(accept_thread.joinable())
+    { accept_thread.detach(); }
+    if(render_thread.joinable())
+    { render_thread.join(); }
   }
 
   void core::render()

@@ -67,6 +67,7 @@ namespace server
       op::stat_collector m_stat_collector;
 
       /* UI */
+      /* TODO: Should the context be local to the render thread? */
       shared::term::context m_context;
       shared::term::window m_root_window;
       ui::home m_home_window{ *this };

@@ -21,3 +21,8 @@ bin/
 
 # Log files
 log.out
+log
+
+# Vim files
+tags
+*.taghl
