@@ -41,8 +41,11 @@ Tasks (in somewhat-chronological order)
   [X] Start collecting CPU information from workers
     [X] Flush out reader operator to send notifications
   [ ] Build TUI for server
+    [X] Design TUI lib
     [ ] Design UI flow
       [X] Stats bars
       [ ] Jobs view; repo, percent complete, num workers, log
       [ ] Workers view (workers have numbers); number, hostname, address, stats, log
-    [X] Logging system
+    [ ] Redesign TUI lib
+    [X] Logging system for server
+    [ ] Logging system for shared sources
