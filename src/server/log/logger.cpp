@@ -21,6 +21,7 @@ namespace server
   {
     std::vector<std::reference_wrapper<std::string const>> chrono_buffer;
     std::map<net::address, std::deque<std::string>> address_buffer;
+    std::string directory{ "log/" };
 
     void initialize()
     {
@@ -42,16 +43,14 @@ namespace server
       { ss << "[error]"; }
 #endif
 
-      std::stringstream addr_ss;
-      addr_ss << a;
-      std::string const addr{ (a == net::address{}) ? "system" : addr_ss.str() };
+      std::string const addr{ (a == net::address{}) ? "system" : a.to_string() };
       ss << "(" << addr << ") ";
       ss << log << std::endl;
 
       address_buffer[a].push_back(ss.str());
       chrono_buffer.push_back(address_buffer[a].back());
 
-      std::ofstream ofs("log/" + addr, std::ios::app);
+      std::ofstream ofs(directory + addr, std::ios::app);
       ofs << ss.str();
     }
   }

@@ -10,6 +10,7 @@
 #include "address.h"
 
 #include <ostream>
+#include <sstream>
 
 namespace shared
 {
@@ -73,5 +74,14 @@ namespace shared
 
     sockaddr_in const* address::to_sock_addr_in() const
     { return &m_sock_addr; }
+
+    std::string address::to_string() const
+    {
+      std::stringstream ss;
+      if(ss << *this)
+      { return ss.str(); }
+      else
+      { throw std::runtime_error("Failed to serialize address"); }
+    }
   }
 }

@@ -41,6 +41,7 @@ namespace server
   {
     extern std::vector<std::reference_wrapper<std::string const>> chrono_buffer;
     extern std::map<net::address, std::deque<std::string>> address_buffer;
+    extern std::string directory;
 
     void initialize();
     void save(net::address const &a, std::string const &log);

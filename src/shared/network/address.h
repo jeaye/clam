@@ -78,6 +78,7 @@ namespace shared
 
         /* Retreives the sockaddr_in version of this address descriptor. */
         sockaddr_in const* to_sock_addr_in() const;
+        std::string to_string() const;
 
       private:
         /* The string-based IPV4 version of this address. */

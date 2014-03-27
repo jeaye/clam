@@ -9,6 +9,7 @@
 
 #include "workers.h"
 #include "server/core.h"
+#include "server/log/logger.h"
 
 #include <iterator>
 
@@ -41,6 +42,7 @@ namespace server
         else
         { ss << "  "; }
 
+        /* TODO: Actual worker number here. */
         ss << "#" << i << ": " << it->first;
         m_list_window.render(0, i, ss.str());
       }
@@ -48,7 +50,20 @@ namespace server
       m_bar.render();
       auto shared(m_selected_worker.lock());
       if(shared)
-      { m_bar.render_worker(shared); }
+      {
+        m_bar.render_worker(shared);
+
+        /* Render log. */
+        std::string const file{ logging::directory + shared->get_address().to_string() };
+        std::ifstream log(file);
+        if(!log.is_open())
+        { throw std::runtime_error("Failed to open worker's log file: " + file); }
+
+        std::string line;
+        size_t log_i{};
+        while(std::getline(log, line))
+        { m_log_window.render(0, log_i++, line); }
+      }
     }
 
     void workers::resize_event(shared::term::resize_event const &ev)
