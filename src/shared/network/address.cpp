@@ -11,6 +11,7 @@
 
 #include <ostream>
 #include <sstream>
+#include <stdexcept>
 
 namespace shared
 {
